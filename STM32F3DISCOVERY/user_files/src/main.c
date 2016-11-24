@@ -3,14 +3,13 @@
 
 #include <globals.h>
 #include <threads.h>
+#include <timer.h>
 #include <lsm303dlhc.h>
 #include <l3gd20.h>
 #include <uart_debug.h>
 
 static void SystemClock_Config(void);
 static void Error_Handler(void);
-
-void Init_Timers(void);
 
 osThreadDef(accelHandlerThread, osPriorityAboveNormal, 1, 0);
 osThreadDef(gyroHandlerThread, osPriorityAboveNormal, 1, 0);
@@ -19,22 +18,20 @@ osMutexDef (accelBuffer_mutex);
 osMutexDef (gyroBuffer_mutex);
 
 int main() {
-	GPIO_InitTypeDef GPIO_InitDef;
-	
+	/* basic core init */
 	SystemClock_Config();
 	SystemCoreClockUpdate();
-	
-	//printf("Hello World!\n 123456");
-	
+	uart_debug_init(&UART4_Handle);
 	HAL_Init();
 
 	/* driver init */
 	//lsm303dlhc_init();
 	//l3gd20_init();
-	uart_debug_init(&UART4_Handle);
 	
+	
+	/* RTOS init */
 	osKernelInitialize();
-	Init_Timers();
+	systemTimers_Init();
 	
 	accelHandlerThread_id = osThreadCreate(osThread(accelHandlerThread), NULL);
 	gyroHandlerThread_id = osThreadCreate(osThread(gyroHandlerThread), NULL);
@@ -43,18 +40,7 @@ int main() {
 	accelBuffer_mutex_id = osMutexCreate(osMutex(accelBuffer_mutex));
 	gyroBuffer_mutex_id = osMutexCreate(osMutex(gyroBuffer_mutex));
 	
-	// enable clock for GPIOE
-	//__HAL_RCC_GPIOE_CLK_ENABLE();
-
-	// init GPIO pin
-	GPIO_InitDef.Pin = GPIO_PIN_9;
-	GPIO_InitDef.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitDef.Speed = GPIO_SPEED_FREQ_LOW;
-	
-	HAL_GPIO_Init(GPIOE, &GPIO_InitDef);
-	
-	// set LD3
-	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_SET);
+	uart_debug_sendString("Hello world!\n");
 	
 	osKernelStart();
 }

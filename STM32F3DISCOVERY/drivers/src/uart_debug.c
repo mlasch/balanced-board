@@ -3,15 +3,17 @@
 #include <uart_debug.h>
 #include <globals.h>
 
+#include <string.h>
+
 UART_HandleTypeDef UART4_Handle;
 
-void uart_debug_init(UART_HandleTypeDef *huart) 
+void uart_debug_init(UART_HandleTypeDef *huart)
 {
 	// 1N8 9600 baud
 	
 	huart->Instance = UART4;
 	huart->gState = HAL_UART_STATE_RESET;
-	huart->Init.BaudRate = 9600;
+	huart->Init.BaudRate = 115200;
 	huart->Init.HwFlowCtl = UART_HWCONTROL_NONE;
 	huart->Init.Mode = UART_MODE_TX_RX;
 	huart->Init.OneBitSampling = UART_ONEBIT_SAMPLING_DISABLED;
@@ -23,4 +25,8 @@ void uart_debug_init(UART_HandleTypeDef *huart)
 	if (HAL_UART_Init(huart) != HAL_OK) {
 		for (;;);
 	}
+}
+
+void uart_debug_sendString(char *c) {
+	HAL_UART_Transmit(&UART4_Handle, (uint8_t *) c, strlen(c), 5000);
 }

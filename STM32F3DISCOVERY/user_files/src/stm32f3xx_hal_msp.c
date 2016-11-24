@@ -63,6 +63,8 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
+static void HAL_LED_MspInit(void);
+
 /* Exported functions ---------------------------------------------------------*/
 
 /** @defgroup HAL_MSP_Exported_Functions HAL MSP Exported Functions
@@ -76,6 +78,7 @@
 void HAL_MspInit(void)
 {
 	HAL_UART_MspInit(&UART4_Handle);
+	HAL_LED_MspInit();
 }
 
 /**
@@ -91,7 +94,7 @@ void HAL_MspDeInit(void)
   * @brief  Initializes the UART MSP.
   * @retval None
   */
-static void HAL_UART_MspInit(UART_HandleTypeDef *huart)
+void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 {
   if (huart->Instance == UART4) {
 		/* f3 discovery:
@@ -110,6 +113,29 @@ static void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 		GPIO_InitStructure.Alternate = GPIO_AF5_UART4;
 		HAL_GPIO_Init(GPIOC, &GPIO_InitStructure);
 	}
+}
+
+/**
+  * @brief  Initializes the LED MSP.
+  * @retval None
+  */
+static void HAL_LED_MspInit(void) 
+{
+	/* f3 discovery
+	 * LD3 (RED LED)		PE9
+	 */
+	GPIO_InitTypeDef GPIO_InitDef;
+	
+	__HAL_RCC_GPIOE_CLK_ENABLE();
+	
+	GPIO_InitDef.Pin = GPIO_PIN_9;
+	GPIO_InitDef.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitDef.Speed = GPIO_SPEED_FREQ_LOW;
+	
+	HAL_GPIO_Init(GPIOE, &GPIO_InitDef);
+	
+	/* set the LED on startup */
+	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_SET);
 }
 
 /**
