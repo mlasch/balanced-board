@@ -33,7 +33,6 @@
  *---------------------------------------------------------------------------*/
  
 #include "cmsis_os.h"
-#include <stdio.h>
  
 
 /*----------------------------------------------------------------------------
@@ -56,7 +55,7 @@
 //   <i> Defines default stack size for threads with osThreadDef stacksz = 0
 //   <i> Default: 200
 #ifndef OS_STKSIZE
- #define OS_STKSIZE     100      // this stack size value is in words
+ #define OS_STKSIZE     50      // this stack size value is in words
 #endif
  
 //   <o>Main Thread stack size [bytes] <64-32768:8><#/4>
@@ -118,7 +117,7 @@
 //   <i> When the Cortex-M SysTick timer is used, the input clock 
 //   <i> is on most systems identical with the core clock.
 #ifndef OS_CLOCK
- #define OS_CLOCK       72000000
+ #define OS_CLOCK       12000000
 #endif
  
 //   <o>RTX Timer tick interval value [us] <1-1000000>
@@ -280,11 +279,7 @@ extern osThreadId svcThreadGetId (void);
 /// \brief Called when a runtime error is detected
 /// \param[in]   error_code   actual error code that has been detected
 void os_error (uint32_t error_code) {
-	osThreadId err_task = svcThreadGetId();
-	
-	printf("CMSIS RTX err_code: 0x%X ", error_code);
-  printf("TASK_ID = 0x%X\r\n", (int)err_task);
-	
+ 
   /* HERE: include optional code to be executed on runtime error. */
   switch (error_code) {
     case OS_ERROR_STACK_OVF:
@@ -303,7 +298,7 @@ void os_error (uint32_t error_code) {
     default:
       break;
   }
-  //for (;;);
+  for (;;);
 }
  
 
