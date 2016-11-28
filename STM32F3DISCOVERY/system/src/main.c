@@ -21,20 +21,20 @@ int main() {
 	/* basic core init */
 	SystemClock_Config();
 	SystemCoreClockUpdate();
-	uart_debug_init(&UART4_Handle);
+	
 	HAL_Init();
 
 	/* driver init */
-	//lsm303dlhc_init();
-	//l3gd20_init();
-	
+	lsm303dlhc_init(&I2C1_Handle);		// Accelerator
+	l3gd20_init(&SPI1_Handle);		// Gyro
+	uart_debug_init(&UART4_Handle);
 	
 	/* RTOS init */
 	osKernelInitialize();
 	systemTimers_Init();
 	
 	accelHandlerThread_id = osThreadCreate(osThread(accelHandlerThread), NULL);
-	gyroHandlerThread_id = osThreadCreate(osThread(gyroHandlerThread), NULL);
+	//gyroHandlerThread_id = osThreadCreate(osThread(gyroHandlerThread), NULL);
 	//visioThread_id = osThreadCreate(osThread(visioThread), NULL);
 	
 	accelBuffer_mutex_id = osMutexCreate(osMutex(accelBuffer_mutex));

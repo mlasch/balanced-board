@@ -77,7 +77,6 @@ static void HAL_LED_MspInit(void);
   */
 void HAL_MspInit(void)
 {
-	HAL_UART_MspInit(&UART4_Handle);
 	HAL_LED_MspInit();
 }
 
@@ -91,12 +90,87 @@ void HAL_MspDeInit(void)
 }
 
 /**
+  * @brief  Initializes the I2C MSP.
+  * @retval None
+  */
+void HAL_I2C_MspInit(I2C_HandleTypeDef *hi2c)
+{
+	if (hi2c->Instance == I2C1) {
+		GPIO_InitTypeDef GPIO_InitStructure;
+
+		__HAL_RCC_I2C1_CLK_ENABLE();
+		__HAL_RCC_GPIOB_CLK_ENABLE();		// I2C1 pins
+		__HAL_RCC_GPIOE_CLK_ENABLE();		// INT pins
+	
+	/* I2C1 pins */
+	GPIO_InitStructure.Pin = (GPIO_PIN_6 | GPIO_PIN_7);
+  GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStructure.Pull = GPIO_PULLDOWN;
+  GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+  GPIO_InitStructure.Alternate = GPIO_AF4_I2C1;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
+	
+	/* lsm303dlhc INT pin */
+	GPIO_InitStructure.Pin = GPIO_PIN_4;
+	GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING;
+	GPIO_InitStructure.Pull = GPIO_NOPULL;
+  GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStructure);
+	
+	HAL_NVIC_SetPriority(EXTI4_IRQn, 2, 1);
+  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+	
+	}
+}
+
+/**
+  * @brief  Initializes the SPI MSP.
+  * @retval None
+  */
+void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi) {
+	if (hspi->Instance == SPI1) {
+		GPIO_InitTypeDef  GPIO_InitStructure;
+	
+		/* SPI1 pins */
+		__HAL_RCC_SPI1_CLK_ENABLE();
+		__HAL_RCC_GPIOE_CLK_ENABLE();
+		__HAL_RCC_GPIOE_CLK_ENABLE();
+		__HAL_RCC_GPIOA_CLK_ENABLE();
+		
+		GPIO_InitStructure.Pin = (GPIO_PIN_5 | GPIO_PIN_7 | GPIO_PIN_6);
+		GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
+		GPIO_InitStructure.Pull  = GPIO_NOPULL; /* or GPIO_PULLDOWN */
+		GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+		GPIO_InitStructure.Alternate = GPIO_AF5_SPI1;
+		HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
+	
+		/* Chip select pins */
+		GPIO_InitStructure.Pin = GPIO_PIN_3;
+		GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
+		GPIO_InitStructure.Pull = GPIO_NOPULL;
+		GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+		HAL_GPIO_Init(GPIOE, &GPIO_InitStructure);
+		
+		/* Interrupt 1 & 2 pins */
+		GPIO_InitStructure.Pin = (GPIO_PIN_1 | GPIO_PIN_0);
+		GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING;
+		GPIO_InitStructure.Pull = GPIO_NOPULL;
+		GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+		HAL_GPIO_Init(GPIOE, &GPIO_InitStructure);
+		
+		// enable EXTI for INT2
+		HAL_NVIC_SetPriority(EXTI1_IRQn, 2, 0);
+		HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+	}
+}
+
+/**
   * @brief  Initializes the UART MSP.
   * @retval None
   */
 void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 {
-  if (huart->Instance == UART4) {
+	if (huart->Instance == UART4) {
 		/* f3 discovery:
 		 * UART4_TX		PC10
 		 * UART4_RX 	PC11
@@ -114,6 +188,19 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 		HAL_GPIO_Init(GPIOC, &GPIO_InitStructure);
 	}
 }
+
+/**
+  * @brief  Initializes the  MSP.
+  * @retval None
+  */
+//void HAL_SPI_MspInit(UART_HandleTypeDef *huart)
+//{
+//	/* f3 discovery:
+//	 * UART4_TX		PC10
+//	 * UART4_RX 	PC11
+//	 */
+
+//}
 
 /**
   * @brief  Initializes the LED MSP.

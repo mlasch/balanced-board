@@ -66,9 +66,5 @@
 #define TEMP_OUT_H_M	0x31
 #define TEMP_OUT_L_M 	0x32
 
-
-extern I2C_HandleTypeDef I2C1_Handle;
-//extern uint8_t accelBuffer[6];
-
-void lsm303dlhc_init(void);
+void lsm303dlhc_init(I2C_HandleTypeDef *);
 void readAccel(uint8_t *);

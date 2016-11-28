@@ -6,10 +6,10 @@
  #ifndef _L3GD20_H
 #define _L3GD20_H
 
-#define GYRO_SPI_CLK_ENABLE()	__HAL_RCC_SPI1_CLK_ENABLE()
-#define GYRO_INT_CLK_ENABLE()	__HAL_RCC_GPIOE_CLK_ENABLE()
-#define GYRO_CS_CLK_ENABLE()	__HAL_RCC_GPIOE_CLK_ENABLE()
-#define GYRO_GPIO_CLK_ENABLE()	__HAL_RCC_GPIOA_CLK_ENABLE()
+#define L3GD20_SPI_CLK_ENABLE()	__HAL_RCC_SPI1_CLK_ENABLE()
+#define L3GD20_INT_CLK_ENABLE()	__HAL_RCC_GPIOE_CLK_ENABLE()
+#define L3GD20_CS_CLK_ENABLE()	__HAL_RCC_GPIOE_CLK_ENABLE()
+#define L3GD20_GPIO_CLK_ENABLE()	__HAL_RCC_GPIOA_CLK_ENABLE()
 
 #define L3GD20_SPI	SPI1
 #define L3GD20_PORT	GPIOA
@@ -62,7 +62,7 @@
 
 //extern uint8_t gyroBuffer[6];
 
-void l3gd20_init(void);
+void l3gd20_init(SPI_HandleTypeDef *);
 void l3gd20_read(uint8_t* pBuffer, uint8_t ReadAddr, uint16_t NumByteToRead);
 void l3gd20_write(uint8_t* pBuffer, uint8_t WriteAddr, uint16_t NumByteToWrite);
 void readGyro(uint8_t *);

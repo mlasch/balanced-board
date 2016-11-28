@@ -21,6 +21,10 @@ void accelHandlerThread(void const *arg) {
 	while(1) {
 		event = osSignalWait(0x01, osWaitForever);
 		
+		if (event.status == osOK) {
+			// TODO: handle event, really?
+		}
+		
 		readAccel(buffer);	
 		
 		osMutexWait(accelBuffer_mutex_id, osWaitForever);
@@ -37,6 +41,10 @@ void gyroHandlerThread(void const *arg) {
 	
 	while(1) {	
 		event = osSignalWait(0x02, osWaitForever);
+		
+		if (event.status == osOK) {
+			// TODO: handle event, really?
+		}
 		
 		readGyro(buffer);
 		

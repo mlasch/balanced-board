@@ -15,9 +15,7 @@ static void LED_Timer_Callback (void const *arg) {
   HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_9);
 }
 
-void systemTimers_Init(void) {
-	osStatus status;
-	
+void systemTimers_Init(void) {	
 	// Create periodic timer
   LED_Timer_ID = osTimerCreate(osTimer(Timer2), osTimerPeriodic, (void *) NULL);
 	

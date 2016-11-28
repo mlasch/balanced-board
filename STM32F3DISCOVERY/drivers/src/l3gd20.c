@@ -5,9 +5,10 @@
 
 #include <l3gd20.h>
 
+/* globals */
 SPI_HandleTypeDef SPI1_Handle;
 
-static void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi);
+/* private functions */
 static uint8_t SPIx_WriteRead(uint8_t Byte);
 static void l3gd20_write_reg(uint8_t regAddr, uint8_t value);
 
@@ -19,66 +20,15 @@ void readGyro(uint8_t *buffer) {
 	l3gd20_read(buffer, startAddr, 6);
 }
 
-void l3gd20_init(void) {
+void l3gd20_init(SPI_HandleTypeDef *hspi) {
 	uint8_t buffer[6];
 	
-	HAL_SPI_MspInit(&SPI1_Handle);
-	
-	GYRO_CS_HIGH();	// CS high
-	
-	/* configure L3GD20's registers */
-	l3gd20_write_reg(CTRL_REG1, 0x0f);
-	l3gd20_write_reg(CTRL_REG3, 0x08);
-	l3gd20_write_reg(CTRL_REG4, 0x30);
-	
-	//l3gd20_read(&readBuffer, CTRL_REG1, 1);
-	
-	readGyro(buffer);
-}
-
-static void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi) {
-	GPIO_InitTypeDef  GPIO_InitStructure;
-	
-	/* SPI1 pins */
-	GYRO_GPIO_CLK_ENABLE();
-	
-	GPIO_InitStructure.Pin = (L3GD20_SCK_PIN | L3GD20_MOSI_PIN | L3GD20_MISO_PIN);
-  GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStructure.Pull  = GPIO_NOPULL; /* or GPIO_PULLDOWN */
-  GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
-  GPIO_InitStructure.Alternate = L3GD20_GPIO_AF;
-  HAL_GPIO_Init(L3GD20_PORT, &GPIO_InitStructure);
-	
-	/* Chip select pins */
-	GYRO_CS_CLK_ENABLE();
-	
-	GPIO_InitStructure.Pin = L3GD20_CS_PIN;
-	GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStructure.Pull = GPIO_NOPULL;
-	GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
-	HAL_GPIO_Init(L3GD20_CS_PORT, &GPIO_InitStructure);
-	
-	/* Interrupt 1 & 2 pins */
-	GYRO_INT_CLK_ENABLE();
-	
-	GPIO_InitStructure.Pin = (L3GD20_MEMS_INT2_PIN | L3GD20_MEMS_INT1_PIN);
-	GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING;
-	GPIO_InitStructure.Pull = GPIO_NOPULL;
-	GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
-	HAL_GPIO_Init(L3GD20_INT_PORT, &GPIO_InitStructure);
-	
-	// enable EXTI for INT2
-	HAL_NVIC_SetPriority(EXTI1_IRQn, 2, 0);
-  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
-	
-	if(HAL_SPI_GetState(&SPI1_Handle) == HAL_SPI_STATE_RESET) {
+	if(HAL_SPI_GetState(hspi) == HAL_SPI_STATE_RESET) {
 		
-		GYRO_SPI_CLK_ENABLE();
-		
-		SPI1_Handle.Instance = L3GD20_SPI;
+		hspi->Instance = SPI1;
 	
     /* Set SPI1 baudrate to 4.5 Mhz according to the demo
-		 * PCLK2/SPI_BaudRatePrescaler = 72/16 = 4.5 MHz
+		 * SCL = PCLK2/SPI_BaudRatePrescaler = 72/16 = 4.5 MHz
 		 * L3GD20 SCL fmax = 10 MHz
 		 */
     hspi->Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
@@ -94,7 +44,18 @@ static void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi) {
     hspi->Init.Mode = SPI_MODE_MASTER;
 		
     HAL_SPI_Init(hspi);
-  }
+	
+		GYRO_CS_HIGH();	// CS high
+		
+		/* configure L3GD20's registers */
+		l3gd20_write_reg(CTRL_REG1, 0x0f);
+		l3gd20_write_reg(CTRL_REG3, 0x08);
+		l3gd20_write_reg(CTRL_REG4, 0x30);
+		
+		//l3gd20_read(&readBuffer, CTRL_REG1, 1);
+		
+		readGyro(buffer);
+	}
 }
 
 void l3gd20_read(uint8_t* pBuffer, uint8_t ReadAddr, uint16_t NumByteToRead) {  
