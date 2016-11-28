@@ -334,7 +334,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F303xC,USE_HAL_DRIVER,HSI_VALUE=8000000</Define>
               <Undefine></Undefine>
-              <IncludePath>..\STM32Cube_FW_F3_V1.5.0\Drivers\STM32F3xx_HAL_Driver\Inc;..\STM32Cube_FW_F3_V1.5.0\Drivers\CMSIS\Include;..\STM32Cube_FW_F3_V1.5.0\Drivers\CMSIS\Device\ST\STM32F3xx\Include;..\STM32F3DISCOVERY\system\inc;..\STM32F3DISCOVERY\drivers\inc</IncludePath>
+              <IncludePath>..\STM32Cube_FW_F3_V1.5.0\Drivers\STM32F3xx_HAL_Driver\Inc;..\STM32Cube_FW_F3_V1.5.0\Drivers\CMSIS\Include;..\STM32Cube_FW_F3_V1.5.0\Drivers\CMSIS\Device\ST\STM32F3xx\Include;..\balanced-board\system\inc;..\balanced-board\drivers\inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -380,42 +380,42 @@
             <File>
               <FileName>system_stm32f3xx.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\STM32F3DISCOVERY\system\src\system_stm32f3xx.c</FilePath>
+              <FilePath>..\balanced-board\system\src\system_stm32f3xx.c</FilePath>
             </File>
             <File>
               <FileName>startup_stm32f303xc.s</FileName>
               <FileType>2</FileType>
-              <FilePath>..\STM32F3DISCOVERY\system\src\startup_stm32f303xc.s</FilePath>
+              <FilePath>..\balanced-board\system\src\startup_stm32f303xc.s</FilePath>
             </File>
             <File>
               <FileName>stm32f3xx_it.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\STM32F3DISCOVERY\system\src\stm32f3xx_it.c</FilePath>
+              <FilePath>..\balanced-board\system\src\stm32f3xx_it.c</FilePath>
             </File>
             <File>
               <FileName>timer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\STM32F3DISCOVERY\system\src\timer.c</FilePath>
+              <FilePath>..\balanced-board\system\src\timer.c</FilePath>
             </File>
             <File>
               <FileName>stm32f3xx_hal_msp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\STM32F3DISCOVERY\system\src\stm32f3xx_hal_msp.c</FilePath>
+              <FilePath>..\balanced-board\system\src\stm32f3xx_hal_msp.c</FilePath>
             </File>
             <File>
               <FileName>threads.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\STM32F3DISCOVERY\system\src\threads.c</FilePath>
+              <FilePath>..\balanced-board\system\src\threads.c</FilePath>
             </File>
             <File>
               <FileName>fputc_debug.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\STM32F3DISCOVERY\system\src\fputc_debug.c</FilePath>
+              <FilePath>..\balanced-board\system\src\fputc_debug.c</FilePath>
             </File>
             <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\STM32F3DISCOVERY\system\src\main.c</FilePath>
+              <FilePath>..\balanced-board\system\src\main.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -425,17 +425,17 @@
             <File>
               <FileName>lsm303dlhc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\STM32F3DISCOVERY\drivers\src\lsm303dlhc.c</FilePath>
+              <FilePath>..\balanced-board\drivers\src\lsm303dlhc.c</FilePath>
             </File>
             <File>
               <FileName>l3gd20.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\STM32F3DISCOVERY\drivers\src\l3gd20.c</FilePath>
+              <FilePath>..\balanced-board\drivers\src\l3gd20.c</FilePath>
             </File>
             <File>
               <FileName>uart_debug.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\STM32F3DISCOVERY\drivers\src\uart_debug.c</FilePath>
+              <FilePath>..\balanced-board\drivers\src\uart_debug.c</FilePath>
             </File>
           </Files>
         </Group>

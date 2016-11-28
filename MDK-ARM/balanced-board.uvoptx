@@ -175,7 +175,7 @@
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\STM32F3DISCOVERY\system\src\startup_stm32f303xc.s</Filename>
+          <Filename>C:\Users\marc\Documents\balanced-board\STM32F3DISCOVERY\system\src\startup_stm32f303xc.s</Filename>
           <ExecCommand></ExecCommand>
           <Expression>\\imu_sensors\../STM32F3DISCOVERY/system/src/startup_stm32f303xc.s\190</Expression>
         </Bp>
@@ -268,7 +268,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\STM32F3DISCOVERY\system\src\system_stm32f3xx.c</PathWithFileName>
+      <PathWithFileName>..\balanced-board\system\src\system_stm32f3xx.c</PathWithFileName>
       <FilenameWithoutPath>system_stm32f3xx.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -280,7 +280,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\STM32F3DISCOVERY\system\src\startup_stm32f303xc.s</PathWithFileName>
+      <PathWithFileName>..\balanced-board\system\src\startup_stm32f303xc.s</PathWithFileName>
       <FilenameWithoutPath>startup_stm32f303xc.s</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -292,7 +292,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\STM32F3DISCOVERY\system\src\stm32f3xx_it.c</PathWithFileName>
+      <PathWithFileName>..\balanced-board\system\src\stm32f3xx_it.c</PathWithFileName>
       <FilenameWithoutPath>stm32f3xx_it.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -304,7 +304,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\STM32F3DISCOVERY\system\src\timer.c</PathWithFileName>
+      <PathWithFileName>..\balanced-board\system\src\timer.c</PathWithFileName>
       <FilenameWithoutPath>timer.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -316,7 +316,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\STM32F3DISCOVERY\system\src\stm32f3xx_hal_msp.c</PathWithFileName>
+      <PathWithFileName>..\balanced-board\system\src\stm32f3xx_hal_msp.c</PathWithFileName>
       <FilenameWithoutPath>stm32f3xx_hal_msp.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -328,7 +328,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\STM32F3DISCOVERY\system\src\threads.c</PathWithFileName>
+      <PathWithFileName>..\balanced-board\system\src\threads.c</PathWithFileName>
       <FilenameWithoutPath>threads.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -340,7 +340,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\STM32F3DISCOVERY\system\src\fputc_debug.c</PathWithFileName>
+      <PathWithFileName>..\balanced-board\system\src\fputc_debug.c</PathWithFileName>
       <FilenameWithoutPath>fputc_debug.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -352,7 +352,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\STM32F3DISCOVERY\system\src\main.c</PathWithFileName>
+      <PathWithFileName>..\balanced-board\system\src\main.c</PathWithFileName>
       <FilenameWithoutPath>main.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -372,7 +372,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\STM32F3DISCOVERY\drivers\src\lsm303dlhc.c</PathWithFileName>
+      <PathWithFileName>..\balanced-board\drivers\src\lsm303dlhc.c</PathWithFileName>
       <FilenameWithoutPath>lsm303dlhc.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -384,7 +384,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\STM32F3DISCOVERY\drivers\src\l3gd20.c</PathWithFileName>
+      <PathWithFileName>..\balanced-board\drivers\src\l3gd20.c</PathWithFileName>
       <FilenameWithoutPath>l3gd20.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -396,7 +396,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\STM32F3DISCOVERY\drivers\src\uart_debug.c</PathWithFileName>
+      <PathWithFileName>..\balanced-board\drivers\src\uart_debug.c</PathWithFileName>
       <FilenameWithoutPath>uart_debug.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -533,7 +533,7 @@
 
   <Group>
     <GroupName>::CMSIS</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>1</RteFlg>
