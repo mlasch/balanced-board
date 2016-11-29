@@ -7,6 +7,7 @@
 #include <lsm303dlhc.h>
 #include <l3gd20.h>
 #include <uart_debug.h>
+#include <st7529.h>
 
 static void SystemClock_Config(void);
 static void Error_Handler(void);
@@ -32,6 +33,8 @@ int main() {
 	/* RTOS init */
 	osKernelInitialize();
 	systemTimers_Init();
+	
+	st7529_init();
 	
 	accelHandlerThread_id = osThreadCreate(osThread(accelHandlerThread), NULL);
 	//gyroHandlerThread_id = osThreadCreate(osThread(gyroHandlerThread), NULL);

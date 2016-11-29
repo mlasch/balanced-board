@@ -3,7 +3,7 @@
  */
  #include <stm32f3xx.h>
  
- #ifndef _L3GD20_H
+#ifndef _L3GD20_H
 #define _L3GD20_H
 
 #define L3GD20_SPI_CLK_ENABLE()	__HAL_RCC_SPI1_CLK_ENABLE()
