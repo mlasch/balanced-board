@@ -26,24 +26,27 @@ int main() {
 	HAL_Init();
 
 	/* driver init */
-	lsm303dlhc_init(&I2C1_Handle);		// Accelerator
-	l3gd20_init(&SPI1_Handle);		// Gyro
-	uart_debug_init(&UART4_Handle);
+	//lsm303dlhc_init(&I2C1_Handle);		// Accelerator
+	//l3gd20_init(&SPI1_Handle);		// Gyro
+	//uart_debug_init(&UART4_Handle);
 	
 	/* RTOS init */
 	osKernelInitialize();
-	systemTimers_Init();
 	
 	st7529_init();
 	
-	accelHandlerThread_id = osThreadCreate(osThread(accelHandlerThread), NULL);
+	//systemTimers_Init();
+	
+	
+	
+	//accelHandlerThread_id = osThreadCreate(osThread(accelHandlerThread), NULL);
 	//gyroHandlerThread_id = osThreadCreate(osThread(gyroHandlerThread), NULL);
 	//visioThread_id = osThreadCreate(osThread(visioThread), NULL);
 	
-	accelBuffer_mutex_id = osMutexCreate(osMutex(accelBuffer_mutex));
-	gyroBuffer_mutex_id = osMutexCreate(osMutex(gyroBuffer_mutex));
+	//accelBuffer_mutex_id = osMutexCreate(osMutex(accelBuffer_mutex));
+	//gyroBuffer_mutex_id = osMutexCreate(osMutex(gyroBuffer_mutex));
 	
-	uart_debug_sendString("Hello world!\n");
+	//uart_debug_sendString("Hello world!\n");
 	
 	osKernelStart();
 }
