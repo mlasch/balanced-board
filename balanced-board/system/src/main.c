@@ -6,8 +6,8 @@
 #include <timer.h>
 #include <lsm303dlhc.h>
 #include <l3gd20.h>
+#include <ili9488.h>
 #include <uart_debug.h>
-#include <st7529.h>
 
 static void SystemClock_Config(void);
 static void Error_Handler(void);
@@ -26,27 +26,24 @@ int main() {
 	HAL_Init();
 
 	/* driver init */
-	//lsm303dlhc_init(&I2C1_Handle);		// Accelerator
-	//l3gd20_init(&SPI1_Handle);		// Gyro
-	//uart_debug_init(&UART4_Handle);
+	lsm303dlhc_init(&I2C1_Handle);		// Accelerator
+	l3gd20_init(&SPI1_Handle);		// Gyro
+	uart_debug_init(&UART4_Handle);
+	
+	ili9488_init();
 	
 	/* RTOS init */
 	osKernelInitialize();
+	systemTimers_Init();
 	
-	st7529_init();
-	
-	//systemTimers_Init();
-	
-	
-	
-	//accelHandlerThread_id = osThreadCreate(osThread(accelHandlerThread), NULL);
+	accelHandlerThread_id = osThreadCreate(osThread(accelHandlerThread), NULL);
 	//gyroHandlerThread_id = osThreadCreate(osThread(gyroHandlerThread), NULL);
 	//visioThread_id = osThreadCreate(osThread(visioThread), NULL);
 	
-	//accelBuffer_mutex_id = osMutexCreate(osMutex(accelBuffer_mutex));
-	//gyroBuffer_mutex_id = osMutexCreate(osMutex(gyroBuffer_mutex));
+	accelBuffer_mutex_id = osMutexCreate(osMutex(accelBuffer_mutex));
+	gyroBuffer_mutex_id = osMutexCreate(osMutex(gyroBuffer_mutex));
 	
-	//uart_debug_sendString("Hello world!\n");
+	uart_debug_sendString("Hello world!\n");
 	
 	osKernelStart();
 }
@@ -105,7 +102,7 @@ static void SystemClock_Config(void)
 static void Error_Handler(void)
 {
   /* User may add here some code to deal with this error */
-  while(1)
-  {
-  }
+	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_SET);
+	
+  for(;;);
 }

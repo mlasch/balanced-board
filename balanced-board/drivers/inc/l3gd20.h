@@ -1,7 +1,7 @@
 /*
  * file: l3gd20.h
  */
- #include <stm32f3xx.h>
+#include <stm32f3xx.h>
  
 #ifndef _L3GD20_H
 #define _L3GD20_H

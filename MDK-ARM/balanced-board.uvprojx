@@ -438,9 +438,9 @@
               <FilePath>..\balanced-board\drivers\src\uart_debug.c</FilePath>
             </File>
             <File>
-              <FileName>st7529.c</FileName>
+              <FileName>ili9488.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\balanced-board\drivers\src\st7529.c</FilePath>
+              <FilePath>..\balanced-board\drivers\src\ili9488.c</FilePath>
             </File>
           </Files>
         </Group>

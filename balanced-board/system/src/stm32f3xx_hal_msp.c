@@ -47,8 +47,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f3xx_hal.h"
-#include "globals.h"
-#include "st7529.h"
+#include <globals.h>
 
 /** @addtogroup STM32F3xx_HAL_Driver
   * @{
@@ -65,7 +64,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 static void HAL_LED_MspInit(void);
-static void HAL_ST7525_MspInit(void);
+
 /* Exported functions ---------------------------------------------------------*/
 
 /** @defgroup HAL_MSP_Exported_Functions HAL MSP Exported Functions
@@ -78,7 +77,6 @@ static void HAL_ST7525_MspInit(void);
   */
 void HAL_MspInit(void)
 {
-	HAL_ST7525_MspInit();
 	HAL_LED_MspInit();
 }
 
@@ -211,13 +209,14 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 static void HAL_LED_MspInit(void) 
 {
 	/* f3 discovery
-	 * LD3 (RED LED)		PE9
+	 * LD3 (RED LED)		PE9		blinking status
+	 * LD4							PE8		system error
 	 */
 	GPIO_InitTypeDef GPIO_InitDef;
 	
 	__HAL_RCC_GPIOE_CLK_ENABLE();
 	
-	GPIO_InitDef.Pin = GPIO_PIN_9;
+	GPIO_InitDef.Pin = (GPIO_PIN_8 |GPIO_PIN_9);
 	GPIO_InitDef.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitDef.Speed = GPIO_SPEED_FREQ_LOW;
 	
@@ -225,36 +224,7 @@ static void HAL_LED_MspInit(void)
 	
 	/* set the LED on startup */
 	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_SET);
-}
-
-static void HAL_ST7525_MspInit() {
-	/* f3 discovery
-	 * D0			PD0
-	 * ...
-	 * D7			PD7
-	 * A0			PD8			H -> display data, L -> control data
-	 * WR_RW	PD9
-	 * E_RD		PD10
-	 * RST		PD11
-	 * XCS		PD12
-	 */
-	GPIO_InitTypeDef GPIO_InitStructure;
-	
-	__HAL_RCC_GPIOD_CLK_ENABLE();
-	
-	GPIO_InitStructure.Pin = (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7 |
-											GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12);
-	GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
-	
-	HAL_GPIO_Init(GPIOD, &GPIO_InitStructure);
-	
-	/* set the GPIO on startup */
-	HAL_GPIO_WritePin(GPIOD, PIN_A0, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(GPIOD, PIN_WR_RW, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(GPIOD, PIN_E_RD, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(GPIOD, PIN_RST, GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(GPIOD, PIN_XCS, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_RESET);
 }
 
 /**
