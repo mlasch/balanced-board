@@ -110,7 +110,7 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef *hi2c)
   GPIO_InitStructure.Alternate = GPIO_AF4_I2C1;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStructure);
 	
-	/* lsm303dlhc INT pin */
+	/* lsm303dlhc INT1 pin */
 	GPIO_InitStructure.Pin = GPIO_PIN_4;
 	GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING;
 	GPIO_InitStructure.Pull = GPIO_NOPULL;
@@ -224,7 +224,7 @@ static void HAL_LED_MspInit(void)
 	
 	/* set the LED on startup */
 	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_RESET);
 }
 
 /**

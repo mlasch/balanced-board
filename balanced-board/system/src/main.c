@@ -24,13 +24,13 @@ int main() {
 	SystemCoreClockUpdate();
 	
 	HAL_Init();
-
+	
 	/* driver init */
 	lsm303dlhc_init(&I2C1_Handle);		// Accelerator
-	l3gd20_init(&SPI1_Handle);		// Gyro
-	uart_debug_init(&UART4_Handle);
-	
+	//l3gd20_init(&SPI1_Handle);		// Gyro
+	//uart_debug_init(&UART4_Handle);
 	ili9488_init();
+	
 	
 	/* RTOS init */
 	osKernelInitialize();
@@ -41,9 +41,7 @@ int main() {
 	//visioThread_id = osThreadCreate(osThread(visioThread), NULL);
 	
 	accelBuffer_mutex_id = osMutexCreate(osMutex(accelBuffer_mutex));
-	gyroBuffer_mutex_id = osMutexCreate(osMutex(gyroBuffer_mutex));
-	
-	uart_debug_sendString("Hello world!\n");
+	//gyroBuffer_mutex_id = osMutexCreate(osMutex(gyroBuffer_mutex));
 	
 	osKernelStart();
 }

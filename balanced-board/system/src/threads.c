@@ -4,6 +4,7 @@
 #include <lsm303dlhc.h>
 #include <l3gd20.h>
 #include <threads.h>
+#include <uart_debug.h>
 
 osThreadId accelHandlerThread_id, gyroHandlerThread_id;
 osThreadId visioThread_id;
@@ -25,7 +26,7 @@ void accelHandlerThread(void const *arg) {
 			// TODO: handle event, really?
 		}
 		
-		readAccel(buffer);	
+		readAccel(buffer);
 		
 		osMutexWait(accelBuffer_mutex_id, osWaitForever);
 		a.x = buffer[0] | (buffer[1] << 8);

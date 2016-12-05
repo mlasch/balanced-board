@@ -61,7 +61,7 @@
 #define osKernelSystemId "RTX V4.80"   ///< RTOS identification string
 
 
-#define osFeature_MainThread   1       ///< main can be thread
+#define osFeature_MainThread   0       ///< main can be thread
 #define osFeature_Pool         1       ///< Memory Pools available
 #define osFeature_MailQ        1       ///< Mail Queues available
 #define osFeature_MessageQ     1       ///< Message Queues available

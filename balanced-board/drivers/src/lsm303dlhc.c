@@ -19,8 +19,6 @@ void readAccel(uint8_t *buffer_ptr) {
 }
 
 void lsm303dlhc_init(I2C_HandleTypeDef *hi2c) {
-	uint8_t buffer[6];
-	
 	/* lowlevel init */
 	hi2c->Instance = I2C1;
   hi2c->Init.OwnAddress1 =  LINACCEL_I2C_ADDRESS;
@@ -33,10 +31,12 @@ void lsm303dlhc_init(I2C_HandleTypeDef *hi2c) {
 	
 	/* write config */
 	lsm303dlhc_write_reg(LINACCEL_I2C_ADDRESS, CTRL_REG1_A, 0x57);		// 100 Hz, all Axes enabled
-	lsm303dlhc_write_reg(LINACCEL_I2C_ADDRESS, CTRL_REG3_A, 0x10);
-	lsm303dlhc_write_reg(LINACCEL_I2C_ADDRESS, CTRL_REG4_A, 0x88);
+	lsm303dlhc_write_reg(LINACCEL_I2C_ADDRESS, CTRL_REG3_A, 0x10);		// I1_DRDY1=1
 	
-	readAccel(buffer);
+	/* High-resolution output mode=enable
+	 * Block data update=output registers not updated until MSB and LSB
+	 */
+	lsm303dlhc_write_reg(LINACCEL_I2C_ADDRESS, CTRL_REG4_A, 0x88);
 }
 
 static uint8_t lsm303dlhc_read_reg(uint16_t addr, uint8_t reg) {

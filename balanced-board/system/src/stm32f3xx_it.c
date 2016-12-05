@@ -190,6 +190,8 @@ void EXTI1_IRQHandler(void) {
 }
 
 void EXTI4_IRQHandler(void) {
+	/* I1_DRDY1 */
+	
 	__HAL_GPIO_EXTI_CLEAR_FLAG(GPIO_PIN_4);
 	
 	osSignalSet(accelHandlerThread_id, 0x01);

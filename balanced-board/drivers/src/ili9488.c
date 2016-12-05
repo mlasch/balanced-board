@@ -35,27 +35,28 @@ void ili9488_init(void) {
 	size_t config_size = sizeof(ili9488_config);
 	
 	ili9488_gpio_init();
-	
-	osDelay(50);
-	RESX_ACTIVE;
-	osDelay(100);
-	RESX_IDLE;
-	osDelay(100);
-	
-	ili9488_soft_reset();
-	
-	osDelay(50);
-	
-	ili9488_display_off();
-	
-	/* write config to controller */
-	while ((ili9488_config + config_size) != config_ptr) {
-		ili9488_write(*config_ptr, config_ptr+2, *(config_ptr+1));
-		config_ptr += (*(config_ptr+1) + 2);
-	}
-	
-	osDelay(150);
-	ili9488_display_on();
+
+	// TODO: blocking delay for init
+//	osDelay(50);
+//	RESX_ACTIVE;
+//	osDelay(100);
+//	RESX_IDLE;
+//	osDelay(100);
+//		
+//	ili9488_soft_reset();
+//	
+//	osDelay(50);
+//	
+//	ili9488_display_off();
+//	
+//	/* write config to controller */
+////	while ((ili9488_config + config_size) != config_ptr) {
+////		ili9488_write(*config_ptr, config_ptr+2, *(config_ptr+1));
+////		config_ptr += (*(config_ptr+1) + 2);
+////	}
+
+//	osDelay(150);
+//	ili9488_display_on();
 }
 
 static void ili9488_gpio_init(void) {
