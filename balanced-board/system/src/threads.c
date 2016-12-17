@@ -1,91 +1,98 @@
 #include <stm32f3xx.h>
 #include <cmsis_os.h>
 
+#include <string.h>
+#include <stdio.h>
+
+#include <threads.h>
 #include <lsm303dlhc.h>
 #include <l3gd20.h>
-#include <threads.h>
 #include <uart_debug.h>
 
-osThreadId accelHandlerThread_id, gyroHandlerThread_id;
-osThreadId visioThread_id;
+osThreadId acclrmThread_id;
+osThreadId gyroThread_id;
+osThreadId protoThread_id;
 
-osMutexId accelBuffer_mutex_id;
-osMutexId gyroBuffer_mutex_id;
+osMailQDef(imuMailBox, 8, imuData_t);
+osMailQId imuMailBox_id;
 
-struct acceleration a;
-struct orientation o;
+//osMutexId acclrmBufferMutex;
+//osMutexId gyroBufferMutex;
 
-void accelHandlerThread(void const *arg) {
-	osEvent event;
-	uint8_t buffer[6];
+/* private functions */
+static size_t serialize_imuData_t(imuData_t *s, char *buff_ptr);
+
+void acclrmThread(void const *arg) {
+	uint8_t inBuffer[6];
+	imuData_t *acclrmData;
+//	volatile int16_t x,y,z;
+	
+	imuMailBox_id = osMailCreate(osMailQ(imuMailBox), NULL);
+	acclrmData = (imuData_t *) osMailAlloc(imuMailBox_id, osWaitForever);
+	
+	readAcclrmXYZ(inBuffer);
 	
 	while(1) {
-		event = osSignalWait(0x01, osWaitForever);
+		osSignalWait(acclrmSignal, osWaitForever);
 		
-		if (event.status == osOK) {
-			// TODO: handle event, really?
-		}
+		readAcclrmXYZ(inBuffer);
 		
-		readAccel(buffer);
+		acclrmData->type = tAcclrm;
+		acclrmData->x = (float) (int16_t) (inBuffer[0] | (inBuffer[1] << 8));
+		acclrmData->y = (float) (int16_t) (inBuffer[2] | (inBuffer[3] << 8));
+		acclrmData->z = (float) (int16_t) (inBuffer[4] | (inBuffer[5] << 8));
 		
-		osMutexWait(accelBuffer_mutex_id, osWaitForever);
-		a.x = buffer[0] | (buffer[1] << 8);
-		a.y = buffer[2] | (buffer[3] << 8);
-		a.z = buffer[4] | (buffer[5] << 8);
-		osMutexRelease(accelBuffer_mutex_id);
+		osMailPut(imuMailBox_id, acclrmData);
 	}
 }
 
-void gyroHandlerThread(void const *arg) {
-	osEvent event;
-	uint8_t buffer[6];
+void gyroThread(void const *arg) {
+	uint8_t inBuffer[6];
+
 	
 	while(1) {	
-		event = osSignalWait(0x02, osWaitForever);
+		osSignalWait(gyroSignal, osWaitForever);
 		
-		if (event.status == osOK) {
-			// TODO: handle event, really?
-		}
+		readGyroXYZ(inBuffer);
 		
-		readGyro(buffer);
-		
-		osMutexWait(gyroBuffer_mutex_id, osWaitForever);
-		o.x = buffer[0] | (buffer[1] << 8);
-		o.y = buffer[2] | (buffer[3] << 8);
-		o.z = buffer[4] | (buffer[5] << 8);
-		osMutexRelease(gyroBuffer_mutex_id);
+//		x = (float) (inBuffer[0] | (inBuffer[1] << 8));
+//		y = (float) (inBuffer[2] | (inBuffer[3] << 8));
+//		z = (float) (inBuffer[4] | (inBuffer[5] << 8));
 	}
 }
 
-void visioThread(void const *arg) {
-	volatile static struct acceleration a;
-	volatile static struct orientation o;
+void protoThread(void const *arg) {
+	char uartBuffer[100];
+	size_t len = 0;
+	osEvent evt;
+	imuData_t *imuData;
 	
-	a.x = 0;
-	a.y = 0;
-	a.z = 0;
-	
-	o.x = 0;
-	o.y = 0;
-	o.z = 0;
-	
-	while(1) {
-		//event = osSignalWait(0x03, osWaitForever);
-		/*
-		osMutexWait(accelBuffer_mutex_id, osWaitForever);
-		a.x = accelBuffer[0] | (accelBuffer[1] << 8);
-		a.y = accelBuffer[2] | (accelBuffer[3] << 8);
-		a.z = accelBuffer[4] | (accelBuffer[5] << 8);
-		osMutexRelease(accelBuffer_mutex_id);
+	while (1) {
+		evt = osMailGet(imuMailBox_id, osWaitForever);
 		
-		osMutexWait(gyroBuffer_mutex_id, osWaitForever);
-		o.x = gyroBuffer[0] | (gyroBuffer[1] << 8);
-		o.y = gyroBuffer[2] | (gyroBuffer[3] << 8);
-		o.z = gyroBuffer[4] | (gyroBuffer[5] << 8);
-		osMutexRelease(gyroBuffer_mutex_id);
-		*/
-		printf("A%d,%d,%d\n", a.x, a.y, a.z);
+		imuData = (imuData_t *) evt.value.p;
 		
-		osThreadYield();
+//		sprintf(uartBuffer, "X: %5.2f, Y: %5.2f, Z: %5.2f\n", imuData->x, imuData->y, imuData->z);
+//		uart_debug_sendString(uartBuffer, strlen(uartBuffer));
+		len = serialize_imuData_t(imuData, uartBuffer);
+		uart_debug_sendStream(uartBuffer, len);
+		
+		osMailFree(imuMailBox_id, imuData);
 	}
 }
+
+static size_t serialize_imuData_t(imuData_t *s, char *buff_ptr) {
+	const size_t float_len = sizeof(float);
+	const size_t char_len = sizeof(char);
+	
+	*buff_ptr++ = (char) s->type;
+	memcpy(buff_ptr, &s->x, float_len);
+	buff_ptr += sizeof(s->x);
+	memcpy(buff_ptr, &s->y, float_len);
+	buff_ptr += sizeof(s->y);
+	memcpy(buff_ptr, &s->z, float_len);
+	buff_ptr += sizeof(s->z);
+	
+	return 1*char_len + 3*float_len; 
+}
+

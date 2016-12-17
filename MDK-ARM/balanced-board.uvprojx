@@ -175,7 +175,7 @@
             <GenPPlst>0</GenPPlst>
             <AdsCpuType>"Cortex-M4"</AdsCpuType>
             <RvctDeviceName></RvctDeviceName>
-            <mOS>1</mOS>
+            <mOS>0</mOS>
             <uocRom>0</uocRom>
             <uocRam>0</uocRam>
             <hadIROM>1</hadIROM>
@@ -331,10 +331,10 @@
             <v6Lto>0</v6Lto>
             <v6WtE>0</v6WtE>
             <VariousControls>
-              <MiscControls></MiscControls>
+              <MiscControls>--C99</MiscControls>
               <Define>STM32F303xC,USE_HAL_DRIVER,HSI_VALUE=8000000</Define>
               <Undefine></Undefine>
-              <IncludePath>..\STM32Cube_FW_F3_V1.5.0\Drivers\STM32F3xx_HAL_Driver\Inc;..\STM32Cube_FW_F3_V1.5.0\Drivers\CMSIS\Include;..\STM32Cube_FW_F3_V1.5.0\Drivers\CMSIS\Device\ST\STM32F3xx\Include;..\balanced-board\system\inc;..\balanced-board\drivers\inc</IncludePath>
+              <IncludePath>..\STM32Cube_FW_F3_V1.5.0\Drivers\STM32F3xx_HAL_Driver\Inc;..\STM32Cube_FW_F3_V1.5.0\Drivers\CMSIS\Include;..\STM32Cube_FW_F3_V1.5.0\Drivers\CMSIS\Device\ST\STM32F3xx\Include;..\..\..\Desktop\mxtestproject\Middlewares\ST\STM32_USB_Device_Library\Class\CDC\Inc;..\..\..\Desktop\mxtestproject\Middlewares\ST\STM32_USB_Device_Library\Core\Inc;..\balanced-board\system\inc;..\balanced-board\drivers\inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -438,9 +438,19 @@
               <FilePath>..\balanced-board\drivers\src\uart_debug.c</FilePath>
             </File>
             <File>
-              <FileName>ili9488.c</FileName>
+              <FileName>usbd_cdc_if.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\balanced-board\drivers\src\ili9488.c</FilePath>
+              <FilePath>..\balanced-board\drivers\src\usbd_cdc_if.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbd_conf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\balanced-board\drivers\src\usbd_conf.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbd_desc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\balanced-board\drivers\src\usbd_desc.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -497,40 +507,61 @@
               <FileType>1</FileType>
               <FilePath>..\STM32Cube_FW_F3_V1.5.0\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_uart_ex.c</FilePath>
             </File>
+            <File>
+              <FileName>stm32f3xx_hal_pcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\STM32Cube_FW_F3_V1.5.0\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_pcd.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f3xx_hal_pcd_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\STM32Cube_FW_F3_V1.5.0\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_pcd_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f3xx_hal_rcc_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\STM32Cube_FW_F3_V1.5.0\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_rcc_ex.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>::CMSIS</GroupName>
+          <GroupName>stm32_usb_device_lib</GroupName>
+          <Files>
+            <File>
+              <FileName>usbd_cdc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Desktop\mxtestproject\Middlewares\ST\STM32_USB_Device_Library\Class\CDC\Src\usbd_cdc.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbd_core.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Desktop\mxtestproject\Middlewares\ST\STM32_USB_Device_Library\Core\Src\usbd_core.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbd_ctlreq.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Desktop\mxtestproject\Middlewares\ST\STM32_USB_Device_Library\Core\Src\usbd_ctlreq.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbd_ioreq.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\Desktop\mxtestproject\Middlewares\ST\STM32_USB_Device_Library\Core\Src\usbd_ioreq.c</FilePath>
+            </File>
+          </Files>
         </Group>
       </Groups>
     </Target>
   </Targets>
 
   <RTE>
-    <apis>
-      <api Capiversion="1.0" Cclass="CMSIS" Cgroup="RTOS" exclusive="1">
-        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.0.0-Beta4"/>
-        <targetInfos>
-          <targetInfo name="f3 discovery board"/>
-        </targetInfos>
-      </api>
-    </apis>
-    <components>
-      <component Capiversion="1.0" Cclass="CMSIS" Cgroup="RTOS" Csub="Keil RTX" Cvendor="ARM" Cversion="4.81.0" condition="Cortex-M Device Startup">
-        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.0.0-Beta4"/>
-        <targetInfos>
-          <targetInfo name="f3 discovery board"/>
-        </targetInfos>
-      </component>
-    </components>
+    <apis/>
+    <components/>
     <files>
       <file attr="config" category="source" name="CMSIS\RTOS\RTX\Templates\RTX_Conf_CM.c" version="4.70.1">
-        <instance index="0">RTE\CMSIS\RTX_Conf_CM.c</instance>
+        <instance index="0" removed="1">RTE\CMSIS\RTX_Conf_CM.c</instance>
         <component Capiversion="1.0" Cclass="CMSIS" Cgroup="RTOS" Csub="Keil RTX" Cvendor="ARM" Cversion="4.81.0" condition="Cortex-M Device Startup"/>
         <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.0.0-Beta4"/>
-        <targetInfos>
-          <targetInfo name="f3 discovery board"/>
-        </targetInfos>
+        <targetInfos/>
       </file>
       <file attr="config" category="source" condition="Compiler ARMCC" name="Device\Source\ARM\startup_stm32f303xc.s" version="1.3.0">
         <instance index="0" removed="1">RTE\Device\STM32F303VC\startup_stm32f303xc.s</instance>

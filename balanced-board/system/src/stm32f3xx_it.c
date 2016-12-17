@@ -82,6 +82,9 @@ void NMI_Handler(void)
   */
 void HardFault_Handler(void)
 {
+	// activate blue LED
+	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_8, GPIO_PIN_SET);
+	
   /* Go to infinite loop when Hard Fault exception occurs */
   while (1)
   {
@@ -186,7 +189,7 @@ void DebugMon_Handler(void)
 void EXTI1_IRQHandler(void) {
 	__HAL_GPIO_EXTI_CLEAR_FLAG(GPIO_PIN_1);
 	
-	osSignalSet(gyroHandlerThread_id, 0x02);
+	osSignalSet(gyroThread_id, gyroSignal);
 }
 
 void EXTI4_IRQHandler(void) {
@@ -194,9 +197,8 @@ void EXTI4_IRQHandler(void) {
 	
 	__HAL_GPIO_EXTI_CLEAR_FLAG(GPIO_PIN_4);
 	
-	osSignalSet(accelHandlerThread_id, 0x01);
+	osSignalSet(acclrmThread_id, acclrmSignal);
 }
-
 
 
 /**

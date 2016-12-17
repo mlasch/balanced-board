@@ -12,19 +12,16 @@ SPI_HandleTypeDef SPI1_Handle;
 static uint8_t SPIx_WriteRead(uint8_t Byte);
 static void l3gd20_write_reg(uint8_t regAddr, uint8_t value);
 
-uint8_t gyroBuffer[6];
-
-void readGyro(uint8_t *buffer) {
+void readGyroXYZ(uint8_t *buffer) {
 	const uint8_t startAddr = OUT_X_L;
 	
 	l3gd20_read(buffer, startAddr, 6);
 }
 
 void l3gd20_init(SPI_HandleTypeDef *hspi) {
-	uint8_t buffer[6];
 	
 	if(HAL_SPI_GetState(hspi) == HAL_SPI_STATE_RESET) {
-		
+
 		hspi->Instance = SPI1;
 	
     /* Set SPI1 baudrate to 4.5 Mhz according to the demo
@@ -43,7 +40,7 @@ void l3gd20_init(SPI_HandleTypeDef *hspi) {
     hspi->Init.TIMode = SPI_TIMODE_DISABLE;
     hspi->Init.Mode = SPI_MODE_MASTER;
 		
-    HAL_SPI_Init(hspi);
+    //HAL_SPI_Init(hspi);
 	
 		GYRO_CS_HIGH();	// CS high
 		
@@ -53,8 +50,6 @@ void l3gd20_init(SPI_HandleTypeDef *hspi) {
 		l3gd20_write_reg(CTRL_REG4, 0x30);
 		
 		//l3gd20_read(&readBuffer, CTRL_REG1, 1);
-		
-		readGyro(buffer);
 	}
 }
 

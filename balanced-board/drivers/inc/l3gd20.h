@@ -65,6 +65,6 @@
 void l3gd20_init(SPI_HandleTypeDef *);
 void l3gd20_read(uint8_t* pBuffer, uint8_t ReadAddr, uint16_t NumByteToRead);
 void l3gd20_write(uint8_t* pBuffer, uint8_t WriteAddr, uint16_t NumByteToWrite);
-void readGyro(uint8_t *);
+void readGyroXYZ(uint8_t *);
 
 #endif // _L3GD20_H

@@ -10,13 +10,15 @@
 #include <uart_debug.h>
 
 static void SystemClock_Config(void);
-static void Error_Handler(void);
+void Error_Handler(void);
 
-osThreadDef(accelHandlerThread, osPriorityAboveNormal, 1, 0);
-osThreadDef(gyroHandlerThread, osPriorityAboveNormal, 1, 0);
-osThreadDef(visioThread, osPriorityNormal, 1, 0);
-osMutexDef (accelBuffer_mutex);
-osMutexDef (gyroBuffer_mutex);
+// create thread definition structures
+osThreadDef(acclrmThread, osPriorityAboveNormal, 1, 0);
+osThreadDef(gyroThread, osPriorityAboveNormal, 1, 0);
+osThreadDef(protoThread, osPriorityNormal, 1, 0);
+
+//osMutexDef(accelBuffer_mutex);
+//osMutexDef(gyroBuffer_mutex);
 
 int main() {
 	/* basic core init */
@@ -26,21 +28,20 @@ int main() {
 	HAL_Init();
 	
 	/* driver init */
-	lsm303dlhc_init(&I2C1_Handle);		// Accelerator
-	//l3gd20_init(&SPI1_Handle);		// Gyro
-	//uart_debug_init(&UART4_Handle);
-	ili9488_init();
-	
+	lsm303dlhc_init(&I2C1_Handle);		// Accelerometer
+	//l3gd20_init(&SPI1_Handle);				// Gyro
+	uart_debug_init(&UART4_Handle);		// UART for Matlab prototyping
+	//ili9488_init();										// Display
 	
 	/* RTOS init */
 	osKernelInitialize();
 	systemTimers_Init();
 	
-	accelHandlerThread_id = osThreadCreate(osThread(accelHandlerThread), NULL);
-	//gyroHandlerThread_id = osThreadCreate(osThread(gyroHandlerThread), NULL);
-	//visioThread_id = osThreadCreate(osThread(visioThread), NULL);
+	acclrmThread_id = osThreadCreate(osThread(acclrmThread), NULL);
+	protoThread_id = osThreadCreate(osThread(protoThread), NULL);
+	//gyroThread_id = osThreadCreate(osThread(acclrmThread), NULL);
 	
-	accelBuffer_mutex_id = osMutexCreate(osMutex(accelBuffer_mutex));
+	//accelBuffer_mutex_id = osMutexCreate(osMutex(accelBuffer_mutex));
 	//gyroBuffer_mutex_id = osMutexCreate(osMutex(gyroBuffer_mutex));
 	
 	osKernelStart();
@@ -90,14 +91,16 @@ static void SystemClock_Config(void)
   {
     Error_Handler();
   }
+	
 }
+
 
 /**
   * @brief  This function is executed in case of error occurrence.
   * @param  None
   * @retval None
   */
-static void Error_Handler(void)
+void Error_Handler(void)
 {
   /* User may add here some code to deal with this error */
 	HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9, GPIO_PIN_SET);

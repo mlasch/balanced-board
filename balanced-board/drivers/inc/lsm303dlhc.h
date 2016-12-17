@@ -67,4 +67,4 @@
 #define TEMP_OUT_L_M 	0x32
 
 void lsm303dlhc_init(I2C_HandleTypeDef *);
-void readAccel(uint8_t *);
+void readAcclrmXYZ(uint8_t *);

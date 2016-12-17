@@ -190,19 +190,6 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 }
 
 /**
-  * @brief  Initializes the  MSP.
-  * @retval None
-  */
-//void HAL_SPI_MspInit(UART_HandleTypeDef *huart)
-//{
-//	/* f3 discovery:
-//	 * UART4_TX		PC10
-//	 * UART4_RX 	PC11
-//	 */
-
-//}
-
-/**
   * @brief  Initializes the LED MSP.
   * @retval None
   */

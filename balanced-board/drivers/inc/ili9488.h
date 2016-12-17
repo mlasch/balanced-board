@@ -67,7 +67,6 @@ typedef enum {
 #define INTERFACE_PIXEL_FORMAT 0x3a
 #define ADJUST_CONTROL_3 0xF7
 
-
 void ili9488_init(void);
 
 #endif /* __ILI9488_H */
