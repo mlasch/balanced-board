@@ -12,13 +12,13 @@
 static void SystemClock_Config(void);
 void Error_Handler(void);
 
-// create thread definition structures
+/* create thread definition */
 osThreadDef(acclrmThread, osPriorityAboveNormal, 1, 0);
 osThreadDef(gyroThread, osPriorityAboveNormal, 1, 0);
 osThreadDef(protoThread, osPriorityNormal, 1, 0);
 
-//osMutexDef(accelBuffer_mutex);
-//osMutexDef(gyroBuffer_mutex);
+/* Mailbox queue */
+osMailQDef(imuMailBox, 8, imuData_t);
 
 int main() {
 	/* basic core init */
@@ -29,17 +29,19 @@ int main() {
 	
 	/* driver init */
 	lsm303dlhc_init(&I2C1_Handle);		// Accelerometer
-	//l3gd20_init(&SPI1_Handle);				// Gyro
-	uart_debug_init(&UART4_Handle);		// UART for Matlab prototyping
+	l3gd20_init(&SPI1_Handle);				// Gyro
+	uart_debug_init(&UART4_Handle);		// UART for Matlab/Python prototyping
 	//ili9488_init();										// Display
 	
 	/* RTOS init */
+	imuMailBox_id = osMailCreate(osMailQ(imuMailBox), NULL);
+	
 	osKernelInitialize();
 	systemTimers_Init();
 	
 	acclrmThread_id = osThreadCreate(osThread(acclrmThread), NULL);
 	protoThread_id = osThreadCreate(osThread(protoThread), NULL);
-	//gyroThread_id = osThreadCreate(osThread(acclrmThread), NULL);
+	gyroThread_id = osThreadCreate(osThread(gyroThread), NULL);
 	
 	//accelBuffer_mutex_id = osMutexCreate(osMutex(accelBuffer_mutex));
 	//gyroBuffer_mutex_id = osMutexCreate(osMutex(gyroBuffer_mutex));

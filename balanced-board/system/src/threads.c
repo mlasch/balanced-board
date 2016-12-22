@@ -9,15 +9,13 @@
 #include <l3gd20.h>
 #include <uart_debug.h>
 
+/* Global thread ids */
 osThreadId acclrmThread_id;
 osThreadId gyroThread_id;
 osThreadId protoThread_id;
 
-osMailQDef(imuMailBox, 8, imuData_t);
+/* Global Mailbox ids */
 osMailQId imuMailBox_id;
-
-//osMutexId acclrmBufferMutex;
-//osMutexId gyroBufferMutex;
 
 /* private functions */
 static size_t serialize_imuData_t(imuData_t *s, char *buff_ptr);
@@ -25,9 +23,7 @@ static size_t serialize_imuData_t(imuData_t *s, char *buff_ptr);
 void acclrmThread(void const *arg) {
 	uint8_t inBuffer[6];
 	imuData_t *acclrmData;
-//	volatile int16_t x,y,z;
 	
-	imuMailBox_id = osMailCreate(osMailQ(imuMailBox), NULL);
 	acclrmData = (imuData_t *) osMailAlloc(imuMailBox_id, osWaitForever);
 	
 	readAcclrmXYZ(inBuffer);
@@ -48,16 +44,23 @@ void acclrmThread(void const *arg) {
 
 void gyroThread(void const *arg) {
 	uint8_t inBuffer[6];
-
+	imuData_t *gyroData;
+	
+	gyroData = (imuData_t *) osMailAlloc(imuMailBox_id, osWaitForever);
+	
+	readGyroXYZ(inBuffer);
 	
 	while(1) {	
 		osSignalWait(gyroSignal, osWaitForever);
 		
 		readGyroXYZ(inBuffer);
 		
-//		x = (float) (inBuffer[0] | (inBuffer[1] << 8));
-//		y = (float) (inBuffer[2] | (inBuffer[3] << 8));
-//		z = (float) (inBuffer[4] | (inBuffer[5] << 8));
+		gyroData->type = tGyro;
+		gyroData->x = (float) (int16_t) (inBuffer[0] | (inBuffer[1] << 8));
+		gyroData->y = (float) (int16_t) (inBuffer[2] | (inBuffer[3] << 8));
+		gyroData->z = (float) (int16_t) (inBuffer[4] | (inBuffer[5] << 8));
+		
+		osMailPut(imuMailBox_id, gyroData);
 	}
 }
 

@@ -40,7 +40,7 @@ void l3gd20_init(SPI_HandleTypeDef *hspi) {
     hspi->Init.TIMode = SPI_TIMODE_DISABLE;
     hspi->Init.Mode = SPI_MODE_MASTER;
 		
-    //HAL_SPI_Init(hspi);
+    HAL_SPI_Init(hspi);
 	
 		GYRO_CS_HIGH();	// CS high
 		

@@ -30,7 +30,4 @@ extern osThreadId protoThread_id;
 
 extern osMailQId imuMailBox_id;
 
-extern osMutexId acclrmBufferMutex;
-extern osMutexId gyroBufferMutex;
-
 #endif	// _THREADS_H

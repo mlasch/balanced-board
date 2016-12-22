@@ -10,8 +10,6 @@ I2C_HandleTypeDef I2C1_Handle;
 static uint8_t lsm303dlhc_read_reg(uint16_t addr, uint8_t reg);
 static void lsm303dlhc_write_reg(uint16_t addr, uint8_t reg, uint8_t value);
 
-//uint8_t accelBuffer[6];
-
 /*
  * Read XYZ-Axis from sensor. Values are in 16-bit signed int format.
  */
@@ -36,7 +34,7 @@ void lsm303dlhc_init(I2C_HandleTypeDef *hi2c) {
 	HAL_I2C_Init(hi2c);
 	
 	/* write config */
-	lsm303dlhc_write_reg(LINACCEL_I2C_ADDRESS, CTRL_REG1_A, 0x37);		// 1 Hz, all Axes enabled
+	lsm303dlhc_write_reg(LINACCEL_I2C_ADDRESS, CTRL_REG1_A, 0x57);		// 1 Hz, all Axes enabled
 	lsm303dlhc_write_reg(LINACCEL_I2C_ADDRESS, CTRL_REG3_A, 0x10);		// I1_DRDY1=1
 	
 	/* High-resolution output mode=enable
