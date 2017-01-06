@@ -1,62 +1,250 @@
 #include <stm32f3xx.h>
 #include <cmsis_os.h>
-
+//#include <math.h>
 #include <ili9488.h>
+#include <math.h>
 
-/* configuration for ili9488 display controller */
-static const uint8_t ili9488_config[] = {
-	POWER_CONTROL_1,				2, 0x10, 0x10,							// Power Control 1 [0e 0e] ???
-	POWER_CONTROL_2,				1, 0x41,										// Power Control 2 [43]	???
-	VCOM_CONTROL,						4, 0x00, 0x22, 0x80, 0x40,	// VCOM  Control 1 [00 40 00 40] ???
-	MEMORY_ACCESS_CONTROL,	1, 0x68,										// Memory Access [00]
-	INTERFACE_MODE_CONTROL,	1, 0x00,										// Interface [00]
-	FRAME_RATE_CONTROL, 		2, 0xb0, 0x11,							// Frame Rate Control [b0 11]
-	DISPLAY_INVERSION_CONTROL,	1, 0x02,								// Inversion Control [02]
-	DISPLAY_FUNCTION_CONTROL, 	3, 0x02, 0x02, 0x3b,		// Display Function Control [02 02 3b] .kbv NL=480
-	ENTRY_MODE_SET,					1, 0xc6,										// Entry Mode [06]
-	INTERFACE_PIXEL_FORMAT, 1, 0x55,										// Interlace Pixel Format [XX]
-	ADJUST_CONTROL_3, 4, 0xa9, 0x51, 0x2c, 0x82,				// Adjustment Control 3 [a9 51 2c 82]
-	SLEEP_OUT, 0,																				// Sleep Out
-};
 
+#define ATT (float)0.3
 /* private functions */
 static void ili9488_gpio_init(void);
-static void ili9488_data_dir(io_dir_t);
-static void ili9488_write(uint8_t cmd, uint8_t *data, size_t len);
-static void ili9488_read(uint8_t cmd, uint8_t *buffer, size_t len);
+static void ili9488_controller_init(void);
+static void ili9488_write_command(uint8_t);
+static void ili9488_write_data(uint8_t);
+//static void ili9488_data_dir(io_dir_t);
+static void ili9488_clear_screen(void);
+//static void ili9488_draw_pixel(uint16_t x,uint16_t y, uint16_t color);
+//static void ili9488_draw_line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
+//static void ili9488_draw_circle(uint16_t x0, uint16_t y0, uint16_t radius,uint16_t color);
+//static void ili9488_draw_filled_circle(uint16_t x0, uint16_t y0, uint16_t radius,uint16_t color);
+//static void ili9488_draw_bitmap_circle(uint16_t x0, uint16_t y0,uint16_t radius,uint16_t bitmap[40][40]);
+//static int16_t my_abs(int16_t x);
 
-static void ili9488_nop(void) __attribute__((unused));
-static void ili9488_soft_reset(void) __attribute__((unused));
-static void ili9488_display_off(void) __attribute__((unused));
-static void ili9488_display_on(void) __attribute__((unused));
+//void check_border(physics_t *phy, pix_obj *obj) {
+//	if (obj->x0 < BORDER) {
+//		phy->x_v = -1*phy->x_v*ATT;
+//		obj->x0 = BORDER;
+//	}
+//	
+//	if (obj->x0 > WIDTH - obj->width - BORDER) {
+//		phy->x_v = -1*phy->x_v*ATT;
+//		obj->x0 = WIDTH - obj->width - BORDER;
+//	}
+//	
+//	if (obj->y0 < BORDER) {
+//		phy->y_v = -1*phy->y_v*ATT;
+//		obj->y0 = BORDER;
+//	}
+//	
+//	if (obj->y0 > HEIGHT - obj->height - BORDER) {
+//		phy->y_v = -1*phy->y_v*ATT;
+//		obj->y0 = HEIGHT - obj->height - BORDER;
+//	}
+//}
+void check_border2(int32_t *x, int32_t *y) {
+	if (*x < BORDER) {
+		phy.x_v = -1*phy.x_v*ATT;
+		*x = BORDER;
+	}
+	
+	if (*x > WIDTH - ball_bitmap.width - BORDER) {
+		phy.x_v = -1*phy.x_v*ATT;
+		*x = WIDTH - ball_bitmap.width - BORDER;
+	}
+	
+	if (*y < BORDER) {
+		phy.y_v = -1*phy.y_v*ATT;
+		*y = BORDER;
+	}
+	
+	if (*y > HEIGHT - ball_bitmap.height - BORDER) {
+		phy.y_v = -1*phy.y_v*ATT;
+		*y = HEIGHT - ball_bitmap.height - BORDER;
+	}
+}
+
+void draw_rect(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color) {
+	uint16_t i;
+	volatile uint16_t t = 1;
+	volatile int16_t width = x1 - x0;
+	volatile int16_t height = y1 - y0;
+	
+	x1--;
+	y1--;
+	
+	if (x1 - x0 < 0 || y1 - y0 < 0) {
+		//should be an error
+		t = 2;
+		return;
+	}
+	
+	ili9488_write_command(0x2a); // Set_column_address
+	ili9488_write_data(x0>>8);
+	ili9488_write_data(x0);
+	ili9488_write_data(x1>>8);
+	ili9488_write_data(x1);
+	ili9488_write_command(0x2b); // Set_page_address
+	ili9488_write_data(y0>>8);
+	ili9488_write_data(y0);
+	ili9488_write_data(y1>>8);
+	ili9488_write_data(y1);
+	ili9488_write_command(0x2c); // Write_memory_start
+	
+	for(i = 0; i<width*height;i++) {
+			ili9488_write_data(color >> 8);  		// high byte
+			ili9488_write_data(color & 0x00ff);     // low byte
+	}
+}
+
+void draw_obj(pix_obj *obj) {
+	uint16_t i;
+	
+	uint16_t x0 = obj->x0;
+	uint16_t y0 = obj->y0;
+	uint16_t x1 = obj->x0 + obj->width-1;
+	uint16_t y1 = obj->y0 + obj->height-1;
+	
+	ili9488_write_command(0x2a); // Set_column_address
+	ili9488_write_data(x0>>8);
+	ili9488_write_data(x0);
+	ili9488_write_data(x1>>8);
+	ili9488_write_data(x1);
+	ili9488_write_command(0x2b); // Set_page_address
+	ili9488_write_data(y0>>8);
+	ili9488_write_data(y0);
+	ili9488_write_data(y1>>8);
+	ili9488_write_data(y1);
+	ili9488_write_command(0x2c); // Write_memory_start
+	
+	for(i = 0; i<obj->width*obj->height;i++) {
+			ili9488_write_data(obj->data[i] >> 8);  		// high byte
+			ili9488_write_data(obj->data[i] & 0x00ff);     // low byte
+	}
+}
+
+void move_obj(pix_obj *obj, float xf, float yf) {
+	
+	int32_t x = roundf(xf);
+	int32_t y = roundf(yf);
+	
+	check_border2(&x, &y);
+	
+	// update physics after boarder
+	phy.x = x;
+	phy.y = y;
+	
+	int32_t dx = x-obj->x0;
+	int32_t dy = y-obj->y0;
+	
+	uint32_t x0 = obj->x0;
+	uint32_t y0 = obj->y0;
+	uint32_t x1 = obj->x0+obj->width;
+	uint32_t y1 = obj->y0+obj->height;
+	
+	uint32_t x0_n = x;
+	uint32_t y0_n = y;
+	uint32_t x1_n = x+obj->width;
+	uint32_t y1_n = y+obj->height;
+	
+	uint32_t gr_x0, gr_y0, gr_x1, gr_y1;
+	uint32_t bl_x0, bl_y0, bl_x1, bl_y1;
+	
+	if (dx > 0) {
+		if (dy > 0) {
+			// dx + , dy +
+			gr_x0 = x0;
+			gr_y0 = y0;
+			gr_x1 = x1;
+			gr_y1 = y0_n;
+			
+			bl_x0 = x0;
+			bl_y0 = y0_n;
+			bl_x1 = x0_n;
+			bl_y1 = y1;
+			
+		} else {
+			// dx + , dy -
+			gr_x0 = x0;
+			gr_y0 = y1_n;
+			gr_x1 = x1;
+			gr_y1 = y1;
+			
+			bl_x0 = x0;
+			bl_y0 = y0;
+			bl_x1 = x0_n;
+			bl_y1 = y1_n;
+		}
+	} else {
+		if (dy > 0) {
+			// dx - , dy +
+			gr_x0 = x0;
+			gr_y0 = y0;
+			gr_x1 = x1;
+			gr_y1 = y0_n;
+			
+			bl_x0 = x1_n;
+			bl_y0 = y0_n;
+			bl_x1 = x1;
+			bl_y1 = y1;
+		} else {
+			// dx - , dy -
+			gr_x0 = x0;
+			gr_y0 = y1_n;
+			gr_x1 = x1;
+			gr_y1 = y1;
+			
+			bl_x0 = x1_n;
+			bl_y0 = y0;
+			bl_x1 = x1;
+			bl_y1 = y1_n;
+		}
+	}
+
+	// copy new coordinates to object
+	obj->x0 = x0_n;
+	obj->y0 = y0_n;
+	
+
+	
+	//check_border(&phy, &ball_bitmap);
+	
+	draw_obj(obj);
+	
+	draw_rect(gr_x0, gr_y0, gr_x1, gr_y1, 0xffff);
+	draw_rect(bl_x0, bl_y0, bl_x1, bl_y1, 0xffff);
+}
+	
 
 void ili9488_init(void) {
-	uint8_t *config_ptr = (uint8_t *) ili9488_config;
-	size_t config_size = sizeof(ili9488_config);
-	
+	uint16_t i;
+
 	ili9488_gpio_init();
+	ili9488_controller_init();
+	ili9488_clear_screen();
+	
+//	for (i = 0; i< 60; i++) {
+//		move_obj(&ball_bitmap, 4 , 4);
+//		osDelay(10);
+//	}
+//	for (i = 0; i< 120; i++) {
+//		move_obj(&ball_bitmap, 1 , -1);
+//		osDelay(10);
+//	}
+//	for (i = 0; i< 20; i++) {
+//		move_obj(&ball_bitmap, -16 , 0);
+//		osDelay(10);
+//	}
+//	for (i = 0; i< 15; i++) {
+//		move_obj(&ball_bitmap, 16 , 0);
+//		osDelay(10);
+//	}
+//	
+//	for (i = 0; i< 20; i++) {
+//		move_obj(&ball_bitmap, -4 , -4);
+//		osDelay(10);
+//	}
 
-	// TODO: blocking delay for init
-//	osDelay(50);
-//	RESX_ACTIVE;
-//	osDelay(100);
-//	RESX_IDLE;
-//	osDelay(100);
-//		
-//	ili9488_soft_reset();
-//	
-//	osDelay(50);
-//	
-//	ili9488_display_off();
-//	
-//	/* write config to controller */
-////	while ((ili9488_config + config_size) != config_ptr) {
-////		ili9488_write(*config_ptr, config_ptr+2, *(config_ptr+1));
-////		config_ptr += (*(config_ptr+1) + 2);
-////	}
-
-//	osDelay(150);
-//	ili9488_display_on();
+	
 }
 
 static void ili9488_gpio_init(void) {
@@ -74,8 +262,8 @@ static void ili9488_gpio_init(void) {
 	WRX_IDLE;			// HIGH on idle
 	RDX_IDLE;			// HIGH on idle
 	D_CX_DATA;		// 0=CMD, 1=DATA
-	RESX_IDLE;		// active on LOW
-	CSX_IDLE;			// active on LOW
+	RESX_IDLE;		// HIGH on idle
+	CSX_IDLE;			// HIGH on idle
 	
 	GPIO_InitStructure.Pin = (PIN_D0 | PIN_D1 | PIN_D2 | PIN_D3 | \
 														PIN_D4 | PIN_D5 | PIN_D6 | PIN_D7);
@@ -87,79 +275,291 @@ static void ili9488_gpio_init(void) {
 	LCD_PORT->BSRR = LOW_BYTE_TO_BSRR(0x00);
 }
 
-static void ili9488_data_dir(io_dir_t io_dir) {
-	GPIO_InitTypeDef GPIO_InitStructure;
-	
-	GPIO_InitStructure.Pin = (PIN_D0 | PIN_D1 | PIN_D2 | PIN_D3 | \
-														PIN_D4 | PIN_D5 | PIN_D6 | PIN_D7);
-	
-	if (io_dir == io_out) {
-		GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
-	} else {
-		GPIO_InitStructure.Mode = GPIO_MODE_INPUT;
-	}
-	
-	GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
-	HAL_GPIO_Init(LCD_PORT, &GPIO_InitStructure);
-}
+//static void ili9488_data_dir(io_dir_t io_dir) {
+//	GPIO_InitTypeDef GPIO_InitStructure;
+//	
+//	GPIO_InitStructure.Pin = (PIN_D0 | PIN_D1 | PIN_D2 | PIN_D3 | \
+//														PIN_D4 | PIN_D5 | PIN_D6 | PIN_D7);
+//	
+//	if (io_dir == io_out) {
+//		GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
+//	} else {
+//		GPIO_InitStructure.Mode = GPIO_MODE_INPUT;
+//	}
+//	
+//	GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+//	HAL_GPIO_Init(LCD_PORT, &GPIO_InitStructure);
+//}
 
-static void ili9488_write(uint8_t cmd, uint8_t *data, size_t len) {
-	D_CX_CMD;			// 0 = command
+static void ili9488_write_command(uint8_t command) {
+	D_CX_CMD;
+	CSX_ACTIVE;
 	WRX_ACTIVE;
-	LCD_PORT->BSRR = LOW_BYTE_TO_BSRR(cmd);
+	LCD_PORT->BSRR = LOW_BYTE_TO_BSRR(command);
 	WRX_IDLE;
-	osDelay(1);		// TODO get the right timing
+	CSX_IDLE;
+}
+
+static void ili9488_write_data(uint8_t data) {
 	D_CX_DATA;
+	CSX_ACTIVE;
+	WRX_ACTIVE;
+	LCD_PORT->BSRR = LOW_BYTE_TO_BSRR(data);
+	WRX_IDLE;
+	CSX_IDLE;
+}
+
+static void ili9488_controller_init(void) {
 	
-	while (len) {
-		WRX_ACTIVE;
-		LCD_PORT->BSRR = LOW_BYTE_TO_BSRR(*data);
-		data++;
-		WRX_IDLE;
-		len--;
+	// hard reset sequence
+	RESX_IDLE;
+	osDelay(5);		//5 ms
+	RESX_ACTIVE;
+	osDelay(15);  // 15 ms
+	RESX_IDLE;
+	osDelay(15);  // 15 ms
+	
+	ili9488_write_command(0x01);		//Soft Reset
+	
+	osDelay(50);
+	
+	ili9488_write_command(0x28);		//DisplayOff
+	ili9488_write_command(0xC0);		//PowerControl1
+	ili9488_write_data(0x10);
+	ili9488_write_data(0x10);
+	ili9488_write_command(0xC1);		//PowerControl2
+	ili9488_write_data(0x41);
+	ili9488_write_command(0xC5);		//VCOM Control1
+	ili9488_write_data(0x00);
+	ili9488_write_data(0x22);
+	ili9488_write_data(0x80);
+	ili9488_write_data(0x40);
+	ili9488_write_command(0x36);		//MemoryAccess
+	ili9488_write_data(0x28);
+	ili9488_write_command(0xB0);		//Interface
+	ili9488_write_data(0x00);
+	ili9488_write_command(0xB1);		//FrameRateControl
+	ili9488_write_data(0xC0);
+	ili9488_write_data(0x11);
+	ili9488_write_command(0xB4);		//InversionControl
+	ili9488_write_data(0x02);
+	ili9488_write_command(0xB7);		//EntryMode
+	ili9488_write_data(0xC6);
+	ili9488_write_command(0x3A);		//InterfacePixelFormat
+	ili9488_write_data(0x55);
+	ili9488_write_command(0xF7);		//AdjustmentControl
+	ili9488_write_data(0xA9);
+	ili9488_write_data(0x51);
+	ili9488_write_data(0x2c);
+	ili9488_write_data(0x82);
+	ili9488_write_command(0x11);		//SleepOut	
+	osDelay(150);
+	ili9488_write_command(0x29);		// Display ON
+	
+}
+
+static void ili9488_clear_screen(void) {
+	
+	//draw some pixels
+	uint16_t x1 = 0;
+	uint16_t y1 = 0;
+	uint16_t x2 = 479;
+	uint16_t y2 = 319;
+	ili9488_write_command(0x2a); // Set_column_address
+	ili9488_write_data(x1>>8);
+	ili9488_write_data(x1);
+	ili9488_write_data(x2>>8);
+	ili9488_write_data(x2);
+	ili9488_write_command(0x2b); // Set_page_address
+	ili9488_write_data(y1>>8);
+	ili9488_write_data(y1);
+	ili9488_write_data(y2>>8);
+	ili9488_write_data(y2);
+	ili9488_write_command(0x2c); // Write_memory_start
+	
+	for(uint32_t i = 0; i<480*320;i++) {
+		ili9488_write_data(0xff);  		// 
+    ili9488_write_data(0xff);     //
 	}
-}
-
-static void ili9488_read(uint8_t cmd, uint8_t *buffer, size_t len) {
-	D_CX_CMD;			// 0 = command
-	RDX_ACTIVE;
-	LCD_PORT->BSRR = LOW_BYTE_TO_BSRR(cmd);
-	RDX_IDLE;
-	D_CX_DATA;
 	
-	ili9488_data_dir(io_in);
-	
-	while (len+1) {
-		// len+1 because of DUMMY data read
-		RDX_ACTIVE;
-		RDX_IDLE;
-		*buffer++ = LCD_PORT->IDR & 0xff;
-		len--;
-	}
-	
-	ili9488_data_dir(io_out);
 }
 
-static void ili9488_nop(void) {
-	CSX_ACTIVE;
-	ili9488_write(NOP, NULL, 0);
-	CSX_IDLE;
-}
+//static void ili9488_draw_pixel(uint16_t x,uint16_t y, uint16_t color) {
+//	
+//	ili9488_write_command(0x2a);
+//	ili9488_write_data(x>>8);
+//	ili9488_write_data(x);
+//	ili9488_write_data(x>>8);
+//	ili9488_write_data(x);
+//	ili9488_write_command(0x2b);
+//	ili9488_write_data(y>>8);
+//	ili9488_write_data(y);
+//	ili9488_write_data(y>>8);
+//	ili9488_write_data(y);
+//	ili9488_write_command(0x2c);
+//	ili9488_write_data(color >> 8);
+//	ili9488_write_data(color & 0x00FF);	
+//}
 
-static void ili9488_soft_reset(void) {
-	CSX_ACTIVE;
-	ili9488_write(SOFT_RESET, NULL, 0);
-	CSX_IDLE;
-}
 
-static void ili9488_display_off(void) {
-	CSX_ACTIVE;
-	ili9488_write(DISPLAY_OFF, NULL, 0);
-	CSX_IDLE;
-}
+//static void ili9488_draw_line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color) {
+//	uint16_t dx,dy,y;	
+//	dx = x2 - x1;
+//	dy = y2 - y1;
+//	for(uint16_t x=x1;x<=x2;x++) {
+//		y = y1 + dy * (x - x1) / dx;
+//		ili9488_draw_pixel(x, y, color);
+//	}
+//}
 
-static void ili9488_display_on(void) {
-	CSX_ACTIVE;
-	ili9488_write(DISPLAY_ON, NULL, 0);
-	CSX_IDLE;
-}
+
+// draw circle
+//static void ili9488_draw_circle(uint16_t x0, uint16_t y0, uint16_t radius,uint16_t color) {
+//	
+//    uint16_t x = radius;
+//    int16_t y = 0;
+//    int16_t err = 0;
+
+//    while (x >= y)
+//    {
+//        ili9488_draw_pixel(x0 + x, y0 + y, color);
+//        ili9488_draw_pixel(x0 + y, y0 + x, color);
+//        ili9488_draw_pixel(x0 - y, y0 + x, color);
+//        ili9488_draw_pixel(x0 - x, y0 + y, color);
+//        ili9488_draw_pixel(x0 - x, y0 - y, color);
+//        ili9488_draw_pixel(x0 - y, y0 - x, color);
+//        ili9488_draw_pixel(x0 + y, y0 - x, color);
+//        ili9488_draw_pixel(x0 + x, y0 - y, color);
+
+//        if (err <= 0)
+//        {
+//            y += 1;
+//            err += 2*y + 1;
+//        }
+//        if (err > 0)
+//        {
+//            x -= 1;
+//            err -= 2*x + 1;
+//        }
+//    }
+//}
+
+//// draw filled circle
+//static void ili9488_draw_filled_circle(uint16_t x0, uint16_t y0, uint16_t radius,uint16_t color) {
+//	
+//	uint16_t x = radius;
+//	int16_t y = 0;
+//	int16_t err = 0;
+
+//	while (x >= y)
+//	{
+//			ili9488_draw_line(x0 - x,y0 + y,x0 + x,y0 + y,color);
+//			ili9488_draw_line(x0 - y,y0 + x,x0 + y,y0 + x,color);
+//			ili9488_draw_line(x0 - x,y0 - y,x0 + x,y0 - y,color);
+//			ili9488_draw_line(x0 - y,y0 - x,x0 + y,y0 - x,color);
+
+//		if (err <= 0) {
+//			y += 1;
+//			err += 2*y + 1;
+//		}
+//		if (err > 0) {
+//			x -= 1;
+//			err -= 2*x + 1;
+//		}
+//	}
+//}
+
+//static void ili9488_draw_bitmap_circle(uint16_t x0, uint16_t y0,uint16_t radius,uint16_t bitmap[40][40]) {
+//	uint16_t c;
+//	uint16_t x = radius;
+//	int16_t y = 0;
+//	int16_t err = 0;
+//	uint16_t dx,dy,y_out,x_out;
+//	uint16_t x1,x2,y1,y2;
+//	
+//	int16_t diffx,diffy;
+
+//	while (x >= y)
+//	{
+//		x1 = x0 - x;
+//		y1 = y0 + y;
+//		x2 = x0 + x;
+//		y2 = y0 + y;
+//		
+//		dx = x2 - x1;
+//		dy = y2 - y1;
+//		for(uint16_t x_out=x1;x_out<=x2;x_out++) {
+//			y_out = y1 + dy * (x - x1) / dx;
+//			diffx = x_out-x0;
+//			diffy = y_out-y0;
+//			c = bitmap[0][0];
+//			ili9488_draw_pixel(x_out, y_out,bitmap[20+diffx][20+diffy]);
+//		}
+
+//		x1 = x0 - y;
+//		y1 = y0 + x;
+//		x2 = x0 + y;
+//		y2 = y0 + x;
+//		
+//		dx = x2 - x1;
+//		dy = y2 - y1;
+//		for(uint16_t x_out=x1;x_out<=x2;x_out++) {
+//			y_out = y1 + dy * (x - x1) / dx;
+//			diffx = x_out-x0;
+//			diffy = y_out-y0;
+//			ili9488_draw_pixel(x_out, y_out,bitmap[20+diffx][20+diffy]);
+//		}
+//		
+//		x1 = x0 - x;
+//		y1 = y0 - y;
+//		x2 = x0 + x;
+//		y2 = y0 - y;
+//		
+//		dx = x2 - x1;
+//		dy = y2 - y1;
+//		for(uint16_t x_out=x1;x_out<=x2;x_out++) {
+//			y_out = y1 + dy * (x - x1) / dx;
+//			diffx = x_out-x0;
+//			diffy = y_out-y0;
+//			ili9488_draw_pixel(x_out, y_out,bitmap[20+diffx][20+diffy]);
+//		}
+
+//		x1 = x0 - y;
+//		y1 = y0 - x;
+//		x2 = x0 + y;
+//		y2 = y0 - x;
+//		
+//		dx = x2 - x1;
+//		dy = y2 - y1;
+//		for(uint16_t x_out=x1;x_out<=x2;x_out++) {
+//			y_out = y1 + dy * (x - x1) / dx;
+//			diffx = x_out-x0;
+//			diffy = y_out-y0;
+//			ili9488_draw_pixel(x_out, y_out,bitmap[20+diffx][20+diffy]);
+//		}		
+
+//		if (err <= 0) {
+//			y += 1;
+//			err += 2*y + 1;
+//		}
+//		if (err > 0) {
+//			x -= 1;
+//			err -= 2*x + 1;
+//		}
+//	}
+//	
+//}
+
+//static int16_t my_abs(int16_t x) {
+//	int16_t new_abs;
+//	
+//	if(x<0) {
+//		new_abs = x*(-1);
+//	}
+//	else {
+//		new_abs = x;
+//	}
+//	
+//return new_abs;
+//}
+

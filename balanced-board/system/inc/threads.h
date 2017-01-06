@@ -15,6 +15,15 @@ typedef struct {
 	float z;
 } imuData_t;
 
+typedef struct {
+	float x_a;
+	float y_a;
+	float x_v;
+	float y_v;
+	float x;
+	float y;
+} physics_t;
+
 enum bbSignals {
 	acclrmSignal = 0x01,
 	gyroSignal = 0x02

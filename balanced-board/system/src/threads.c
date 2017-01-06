@@ -8,6 +8,11 @@
 #include <lsm303dlhc.h>
 #include <l3gd20.h>
 #include <uart_debug.h>
+#include <math.h>
+#include <arm_math.h>
+#include <ili9488.h>
+
+#define M_PIf (float) 3.14159265359
 
 /* Global thread ids */
 osThreadId acclrmThread_id;
@@ -16,6 +21,9 @@ osThreadId protoThread_id;
 
 /* Global Mailbox ids */
 osMailQId imuMailBox_id;
+
+/* */
+physics_t phy;
 
 /* private functions */
 static size_t serialize_imuData_t(imuData_t *s, char *buff_ptr);
@@ -65,6 +73,12 @@ void gyroThread(void const *arg) {
 }
 
 void protoThread(void const *arg) {
+	const float dt = 0.01;
+	const float g = 9.81;
+	uint32_t i = 0;
+	
+	volatile float a,b, ad,bd;
+	
 	char uartBuffer[100];
 	size_t len = 0;
 	osEvent evt;
@@ -77,8 +91,33 @@ void protoThread(void const *arg) {
 		
 //		sprintf(uartBuffer, "X: %5.2f, Y: %5.2f, Z: %5.2f\n", imuData->x, imuData->y, imuData->z);
 //		uart_debug_sendString(uartBuffer, strlen(uartBuffer));
-		len = serialize_imuData_t(imuData, uartBuffer);
-		uart_debug_sendStream(uartBuffer, len);
+//		len = serialize_imuData_t(imuData, uartBuffer);
+//		uart_debug_sendStream(uartBuffer, len);
+		
+		//if (imuData->type == tAcclrm) {
+			//len = serialize_imuData_t(imuData, uartBuffer);
+			//uart_debug_sendStream(uartBuffer, len);
+			
+			a = atanf(imuData->x/imuData->z);
+			b = atanf(imuData->y/imuData->z);
+			
+			ad = a/2/M_PIf*360;
+			bd = b/2/M_PIf*360;
+			
+			phy.x_a = (float)-1.0*arm_sin_f32(a);
+			phy.y_a = arm_sin_f32(b);
+			
+			phy.x_v = phy.x_v + phy.x_a;
+			phy.y_v = phy.y_v + phy.y_a;
+
+			phy.x = phy.x + phy.x_v;
+			phy.y = phy.y + phy.y_v;
+			
+			
+			//printf("% 2.8f % 2.8f % 2.8f\n", phy.x_a, phy.x_v, phy.x);
+			
+			move_obj(&ball_bitmap, phy.x , phy.y);
+		//}
 		
 		osMailFree(imuMailBox_id, imuData);
 	}

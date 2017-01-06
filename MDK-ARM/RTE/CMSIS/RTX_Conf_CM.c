@@ -279,12 +279,15 @@ extern osThreadId svcThreadGetId (void);
 /// \brief Called when a runtime error is detected
 /// \param[in]   error_code   actual error code that has been detected
 void os_error (uint32_t error_code) {
- 
+
+	volatile osThreadId id;
+	volatile uint32_t err = error_code;
   /* HERE: include optional code to be executed on runtime error. */
   switch (error_code) {
     case OS_ERROR_STACK_OVF:
       /* Stack overflow detected for the currently running task. */
       /* Thread can be identified by calling svcThreadGetId().   */
+			id = svcThreadGetId();
       break;
     case OS_ERROR_FIFO_OVF:
       /* ISR FIFO Queue buffer overflow detected. */
@@ -297,7 +300,10 @@ void os_error (uint32_t error_code) {
       break;
     default:
       break;
+		
+		
   }
+	id = svcThreadGetId();
   for (;;);
 }
  

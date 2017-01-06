@@ -311,7 +311,7 @@
           <Cads>
             <interw>1</interw>
             <Optim>1</Optim>
-            <oTime>0</oTime>
+            <oTime>1</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
             <Strict>0</Strict>
@@ -332,7 +332,7 @@
             <v6WtE>0</v6WtE>
             <VariousControls>
               <MiscControls>--C99</MiscControls>
-              <Define>STM32F303xC,USE_HAL_DRIVER,HSI_VALUE=8000000</Define>
+              <Define>STM32F303xC,USE_HAL_DRIVER,HSI_VALUE=8000000,ARM_MATH_CM4</Define>
               <Undefine></Undefine>
               <IncludePath>..\STM32Cube_FW_F3_V1.5.0\Drivers\STM32F3xx_HAL_Driver\Inc;..\STM32Cube_FW_F3_V1.5.0\Drivers\CMSIS\Include;..\STM32Cube_FW_F3_V1.5.0\Drivers\CMSIS\Device\ST\STM32F3xx\Include;..\..\..\Desktop\mxtestproject\Middlewares\ST\STM32_USB_Device_Library\Class\CDC\Inc;..\..\..\Desktop\mxtestproject\Middlewares\ST\STM32_USB_Device_Library\Core\Inc;..\balanced-board\system\inc;..\balanced-board\drivers\inc</IncludePath>
             </VariousControls>
@@ -417,6 +417,11 @@
               <FileType>1</FileType>
               <FilePath>..\balanced-board\system\src\main.c</FilePath>
             </File>
+            <File>
+              <FileName>ball_bitmap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\balanced-board\drivers\src\ball_bitmap.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -436,6 +441,11 @@
               <FileName>uart_debug.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\balanced-board\drivers\src\uart_debug.c</FilePath>
+            </File>
+            <File>
+              <FileName>ili9488.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\balanced-board\drivers\src\ili9488.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -516,6 +526,12 @@
       </api>
     </apis>
     <components>
+      <component Cclass="CMSIS" Cgroup="DSP" Cvendor="ARM" Cversion="1.4.6" condition="CMSIS DSP">
+        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.0.0-Beta4"/>
+        <targetInfos>
+          <targetInfo name="f3 discovery board"/>
+        </targetInfos>
+      </component>
       <component Capiversion="1.0" Cclass="CMSIS" Cgroup="RTOS" Csub="Keil RTX" Cvendor="ARM" Cversion="4.81.0" condition="Cortex-M Device Startup">
         <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.0.0-Beta4"/>
         <targetInfos>

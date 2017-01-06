@@ -34,7 +34,7 @@ void lsm303dlhc_init(I2C_HandleTypeDef *hi2c) {
 	HAL_I2C_Init(hi2c);
 	
 	/* write config */
-	lsm303dlhc_write_reg(LINACCEL_I2C_ADDRESS, CTRL_REG1_A, 0x57);		// 1 Hz, all Axes enabled
+	lsm303dlhc_write_reg(LINACCEL_I2C_ADDRESS, CTRL_REG1_A, 0x57);		// 1 Hz, all Axes enabled 4xh=50hz 5xh=100hz 2xh=10hz
 	lsm303dlhc_write_reg(LINACCEL_I2C_ADDRESS, CTRL_REG3_A, 0x10);		// I1_DRDY1=1
 	
 	/* High-resolution output mode=enable

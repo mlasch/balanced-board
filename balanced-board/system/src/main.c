@@ -29,9 +29,10 @@ int main() {
 	
 	/* driver init */
 	lsm303dlhc_init(&I2C1_Handle);		// Accelerometer
-	l3gd20_init(&SPI1_Handle);				// Gyro
+	//l3gd20_init(&SPI1_Handle);				// Gyro
 	uart_debug_init(&UART4_Handle);		// UART for Matlab/Python prototyping
-	//ili9488_init();										// Display
+	ili9488_init();										// Display
+	
 	
 	/* RTOS init */
 	imuMailBox_id = osMailCreate(osMailQ(imuMailBox), NULL);
@@ -41,7 +42,7 @@ int main() {
 	
 	acclrmThread_id = osThreadCreate(osThread(acclrmThread), NULL);
 	protoThread_id = osThreadCreate(osThread(protoThread), NULL);
-	gyroThread_id = osThreadCreate(osThread(gyroThread), NULL);
+	//gyroThread_id = osThreadCreate(osThread(gyroThread), NULL);
 	
 	//accelBuffer_mutex_id = osMutexCreate(osMutex(accelBuffer_mutex));
 	//gyroBuffer_mutex_id = osMutexCreate(osMutex(gyroBuffer_mutex));
