@@ -66,6 +66,10 @@
 /*            Cortex-M4 Processor Exceptions Handlers                         */
 /******************************************************************************/
 
+void FPU_IRQHandler(void) {
+	for(;;);
+}
+
 /**
   * @brief   This function handles NMI exception.
   * @param  None

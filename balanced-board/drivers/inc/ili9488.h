@@ -92,10 +92,11 @@ typedef enum {
 
 #define WIDTH 480
 #define HEIGHT 320
-#define BORDER 10
+#define BORDER 5
 
 void ili9488_init(void);
-void move_obj(pix_obj *obj, float dx, float dy);
-void check_border(physics_t*, pix_obj*);
+void draw_rect(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint16_t color);
+void move_obj(pix_obj *obj, uint32_t x, uint32_t y);
+void check_border(physics_t *);
 
 #endif /* __ILI9488_H */

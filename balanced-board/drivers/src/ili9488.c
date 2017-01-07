@@ -5,7 +5,7 @@
 #include <math.h>
 
 
-#define ATT (float)0.3
+#define ATT (float)0.2
 /* private functions */
 static void ili9488_gpio_init(void);
 static void ili9488_controller_init(void);
@@ -20,61 +20,39 @@ static void ili9488_clear_screen(void);
 //static void ili9488_draw_bitmap_circle(uint16_t x0, uint16_t y0,uint16_t radius,uint16_t bitmap[40][40]);
 //static int16_t my_abs(int16_t x);
 
-//void check_border(physics_t *phy, pix_obj *obj) {
-//	if (obj->x0 < BORDER) {
-//		phy->x_v = -1*phy->x_v*ATT;
-//		obj->x0 = BORDER;
-//	}
-//	
-//	if (obj->x0 > WIDTH - obj->width - BORDER) {
-//		phy->x_v = -1*phy->x_v*ATT;
-//		obj->x0 = WIDTH - obj->width - BORDER;
-//	}
-//	
-//	if (obj->y0 < BORDER) {
-//		phy->y_v = -1*phy->y_v*ATT;
-//		obj->y0 = BORDER;
-//	}
-//	
-//	if (obj->y0 > HEIGHT - obj->height - BORDER) {
-//		phy->y_v = -1*phy->y_v*ATT;
-//		obj->y0 = HEIGHT - obj->height - BORDER;
-//	}
-//}
-void check_border2(int32_t *x, int32_t *y) {
-	if (*x < BORDER) {
-		phy.x_v = -1*phy.x_v*ATT;
-		*x = BORDER;
+void check_border(physics_t *phy) {
+	if (phy->x < BORDER) {
+		phy->x_v = -1*phy->x_v*ATT;
+		phy->x = BORDER;
 	}
 	
-	if (*x > WIDTH - ball_bitmap.width - BORDER) {
-		phy.x_v = -1*phy.x_v*ATT;
-		*x = WIDTH - ball_bitmap.width - BORDER;
+	if (phy->x > WIDTH - ball_bitmap.width - BORDER) {
+		phy->x_v = -1*phy->x_v*ATT;
+		phy->x = WIDTH - ball_bitmap.width - BORDER;
 	}
 	
-	if (*y < BORDER) {
-		phy.y_v = -1*phy.y_v*ATT;
-		*y = BORDER;
+	if (phy->y < BORDER) {
+		phy->y_v = -1*phy->y_v*ATT;
+		phy->y = BORDER;
 	}
 	
-	if (*y > HEIGHT - ball_bitmap.height - BORDER) {
-		phy.y_v = -1*phy.y_v*ATT;
-		*y = HEIGHT - ball_bitmap.height - BORDER;
+	if (phy->y > HEIGHT - ball_bitmap.height - BORDER) {
+		phy->y_v = -1*phy->y_v*ATT;
+		phy->y = HEIGHT - ball_bitmap.height - BORDER;
 	}
 }
 
-void draw_rect(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color) {
-	uint16_t i;
-	volatile uint16_t t = 1;
-	volatile int16_t width = x1 - x0;
-	volatile int16_t height = y1 - y0;
+void draw_rect(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint16_t color) {
+	uint32_t i;
+
+	volatile int32_t width = x1 - x0;
+	volatile int32_t height = y1 - y0;
 	
 	x1--;
 	y1--;
 	
-	if (x1 - x0 < 0 || y1 - y0 < 0) {
+	if ((int32_t)(x1 - x0) < 0 || (int32_t)(y1 - y0) < 0) {
 		//should be an error
-		t = 2;
 		return;
 	}
 	
@@ -97,12 +75,12 @@ void draw_rect(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t colo
 }
 
 void draw_obj(pix_obj *obj) {
-	uint16_t i;
+	uint32_t i;
 	
-	uint16_t x0 = obj->x0;
-	uint16_t y0 = obj->y0;
-	uint16_t x1 = obj->x0 + obj->width-1;
-	uint16_t y1 = obj->y0 + obj->height-1;
+	uint32_t x0 = obj->x0;
+	uint32_t y0 = obj->y0;
+	uint32_t x1 = obj->x0 + obj->width-1;
+	uint32_t y1 = obj->y0 + obj->height-1;
 	
 	ili9488_write_command(0x2a); // Set_column_address
 	ili9488_write_data(x0>>8);
@@ -122,19 +100,12 @@ void draw_obj(pix_obj *obj) {
 	}
 }
 
-void move_obj(pix_obj *obj, float xf, float yf) {
+void move_obj(pix_obj *obj, uint32_t x, uint32_t y) {
 	
-	int32_t x = roundf(xf);
-	int32_t y = roundf(yf);
+	int32_t dx = x - obj->x0;
+	int32_t dy = y - obj->y0;
 	
-	check_border2(&x, &y);
-	
-	// update physics after boarder
-	phy.x = x;
-	phy.y = y;
-	
-	int32_t dx = x-obj->x0;
-	int32_t dy = y-obj->y0;
+	//printf("% 3d % 3d\n", dx, dy);
 	
 	uint32_t x0 = obj->x0;
 	uint32_t y0 = obj->y0;
@@ -208,19 +179,18 @@ void move_obj(pix_obj *obj, float xf, float yf) {
 	
 	//check_border(&phy, &ball_bitmap);
 	
-	draw_obj(obj);
-	
 	draw_rect(gr_x0, gr_y0, gr_x1, gr_y1, 0xffff);
 	draw_rect(bl_x0, bl_y0, bl_x1, bl_y1, 0xffff);
+	
+	draw_obj(obj);
 }
 	
 
 void ili9488_init(void) {
-	uint16_t i;
 
 	ili9488_gpio_init();
 	ili9488_controller_init();
-	ili9488_clear_screen();
+	//ili9488_clear_screen();
 	
 //	for (i = 0; i< 60; i++) {
 //		move_obj(&ball_bitmap, 4 , 4);

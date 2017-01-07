@@ -29,6 +29,7 @@ enum bbSignals {
 	gyroSignal = 0x02
 };
 
+void kalman(float *z);
 void acclrmThread(void const *);
 void gyroThread(void const *);
 void protoThread(void const *);
